@@ -1,0 +1,30 @@
+# dependencies
+/node_modules
+
+# build output
+/.next/
+/.vinext/
+/dist/
+/out/
+
+# local design backups
+/.backup/
+
+# local Cloudflare and tool state
+/.wrangler/
+/outputs/
+/work/
+
+# tests
+/coverage/
+
+# local configuration
+.env*
+!.env.example
+
+# editor and OS
+.DS_Store
+*.pem
+*.log
+next-env.d.ts
+*.tsbuildinfo
