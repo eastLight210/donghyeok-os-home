@@ -639,6 +639,7 @@ function AppSwitcher({
   const dragStartRef = useRef(0);
   const dragOffsetRef = useRef(0);
   const wheelOffsetRef = useRef(0);
+  const wheelGestureHandledRef = useRef(false);
   const wheelIdleTimerRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
   const snapFrameRef = useRef<number | null>(null);
@@ -661,6 +662,11 @@ function AppSwitcher({
     setVisualReelIndex((currentIndex) => currentIndex + direction);
     onRotate(direction);
   }, [onRotate]);
+  const rotateReelRef = useRef(rotateReel);
+
+  useEffect(() => {
+    rotateReelRef.current = rotateReel;
+  }, [rotateReel]);
 
   const selectReel = (appId: PublicAppId) => {
     const targetIndex = publicApps.findIndex((app) => app.id === appId);
@@ -740,28 +746,7 @@ function AppSwitcher({
     const stage = stageRef.current;
     if (!stage) return;
 
-    const finishWheelGesture = () => {
-      wheelIdleTimerRef.current = null;
-      const offset = wheelOffsetRef.current;
-      const segmentWidth = getSegmentWidth();
-      wheelOffsetRef.current = 0;
-
-      if (!segmentWidth) {
-        delete stage.dataset.dragging;
-        setTrackDragOffset(0);
-        return;
-      }
-
-      const threshold = Math.min(88, Math.max(44, segmentWidth * 0.14));
-      const direction = Math.abs(offset) >= threshold
-        ? (offset < 0 ? 1 : -1)
-        : null;
-
-      if (direction) {
-        flushSync(() => rotateReel(direction));
-        setTrackDragOffset(offset + direction * segmentWidth);
-      }
-
+    const snapWheelToCenter = () => {
       snapFrameRef.current = window.requestAnimationFrame(() => {
         snapFrameRef.current = window.requestAnimationFrame(() => {
           delete stage.dataset.dragging;
@@ -771,6 +756,23 @@ function AppSwitcher({
       });
     };
 
+    const finishWheelGesture = () => {
+      wheelIdleTimerRef.current = null;
+      wheelGestureHandledRef.current = false;
+      wheelOffsetRef.current = 0;
+      if (stage.dataset.dragging) snapWheelToCenter();
+    };
+
+    const scheduleWheelGestureEnd = () => {
+      if (wheelIdleTimerRef.current !== null) {
+        window.clearTimeout(wheelIdleTimerRef.current);
+      }
+      wheelIdleTimerRef.current = window.setTimeout(
+        finishWheelGesture,
+        REEL_WHEEL_IDLE_DELAY,
+      );
+    };
+
     const handleWheel = (event: WheelEvent) => {
       if (
         event.ctrlKey
@@ -778,6 +780,11 @@ function AppSwitcher({
       ) return;
 
       event.preventDefault();
+      if (wheelGestureHandledRef.current) {
+        scheduleWheelGestureEnd();
+        return;
+      }
+
       if (snapFrameRef.current !== null) {
         window.cancelAnimationFrame(snapFrameRef.current);
         snapFrameRef.current = null;
@@ -804,13 +811,17 @@ function AppSwitcher({
       stage.dataset.dragging = "true";
       setTrackDragOffset(offset);
 
-      if (wheelIdleTimerRef.current !== null) {
-        window.clearTimeout(wheelIdleTimerRef.current);
+      const threshold = Math.min(88, Math.max(44, segmentWidth * 0.14));
+      if (Math.abs(offset) >= threshold) {
+        const direction = offset < 0 ? 1 : -1;
+        wheelGestureHandledRef.current = true;
+        wheelOffsetRef.current = 0;
+        flushSync(() => rotateReelRef.current(direction));
+        setTrackDragOffset(offset + direction * segmentWidth);
+        snapWheelToCenter();
       }
-      wheelIdleTimerRef.current = window.setTimeout(
-        finishWheelGesture,
-        REEL_WHEEL_IDLE_DELAY,
-      );
+
+      scheduleWheelGestureEnd();
     };
 
     stage.addEventListener("wheel", handleWheel, { passive: false });
@@ -821,8 +832,9 @@ function AppSwitcher({
         wheelIdleTimerRef.current = null;
       }
       wheelOffsetRef.current = 0;
+      wheelGestureHandledRef.current = false;
     };
-  }, [getSegmentWidth, rotateReel, setTrackDragOffset]);
+  }, [getSegmentWidth, setTrackDragOffset]);
 
   const updateReelTilt = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "mouse") return;

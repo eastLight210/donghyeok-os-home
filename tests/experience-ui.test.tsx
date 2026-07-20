@@ -478,14 +478,14 @@ describe("DonghyeokOS UI contract", () => {
     const horizontalWheel = wheelEvent({ deltaX: 60, deltaY: 4 });
     await act(async () => stage.dispatchEvent(horizontalWheel));
     expect(horizontalWheel.defaultPrevented).toBe(true);
-    expect(track.style.getPropertyValue("--drag-offset")).toBe("-60px");
-    expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("-60px");
     expect(stage.dataset.dragging).toBe("true");
     expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Projects",
+      "Now",
     );
 
-    await act(async () => vi.advanceTimersByTimeAsync(140));
+    const momentumWheel = wheelEvent({ deltaX: 60, deltaY: 4 });
+    await act(async () => stage.dispatchEvent(momentumWheel));
+    expect(momentumWheel.defaultPrevented).toBe(true);
     expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
       "Now",
     );
@@ -494,6 +494,8 @@ describe("DonghyeokOS UI contract", () => {
     expect(stage.dataset.dragging).toBeUndefined();
     expect(track.style.getPropertyValue("--drag-offset")).toBe("0px");
     expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("0px");
+
+    await act(async () => vi.advanceTimersByTimeAsync(140));
   });
 
   it("tilts the reel and offsets its reflection with pointer position", async () => {
