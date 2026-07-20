@@ -2112,6 +2112,50 @@ a[href] {
   }
 }
 
+/* Press feedback — touch parity for hover-only affordances */
+
+.dock-item,
+.system-control,
+.monitor,
+.now-note,
+.traffic-light-button,
+.switcher-controls button {
+  touch-action: manipulation;
+}
+
+.dock-item {
+  transition: transform var(--motion-press) ease-out;
+}
+
+.dock-item:active {
+  transform: scale(0.95);
+}
+
+.system-control > span {
+  transition: transform var(--motion-press) ease-out;
+}
+
+.system-control:active > span {
+  transform: scale(0.9);
+}
+
+.switcher-controls button:active {
+  transform: translateY(0) scale(0.96);
+  background: rgb(255 255 255 / 22%);
+}
+
+.now-note:active {
+  transform: rotate(-1.4deg) translateY(-1px);
+}
+
+.monitor:active {
+  transform: scale(0.99);
+}
+
+.traffic-light-button:active {
+  filter: brightness(0.82);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

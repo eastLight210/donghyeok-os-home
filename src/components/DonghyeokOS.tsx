@@ -911,6 +911,7 @@ function AppSwitcher({
 
     suppressClickRef.current = Math.abs(offset) > REEL_DRAG_ACTIVATION_DISTANCE;
     if (direction) {
+      if (event.pointerType === "touch") navigator.vibrate?.(8);
       flushSync(() => rotateReel(direction));
       const continuityOffset = offset + direction * segmentWidth;
       setTrackDragOffset(continuityOffset);
