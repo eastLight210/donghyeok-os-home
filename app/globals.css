@@ -232,7 +232,7 @@ a[href] {
 
 .boot-label {
   position: absolute;
-  bottom: 3vh;
+  bottom: calc(3vh + var(--safe-area-bottom));
   left: 50%;
   z-index: var(--z-window);
   margin: 0;
@@ -417,7 +417,7 @@ a[href] {
 .desktop-surface {
   position: relative;
   min-height: 100dvh;
-  padding-top: 56px;
+  padding-top: calc(var(--menu-bar-height) + var(--safe-area-top));
 }
 
 .desktop-home {
@@ -432,10 +432,10 @@ a[href] {
   inset: 0 0 auto;
   z-index: var(--z-menu-bar);
   display: flex;
-  height: 56px;
+  height: calc(var(--menu-bar-height) + var(--safe-area-top));
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-6);
+  padding: var(--safe-area-top) var(--space-6) 0;
   border-bottom: 1px solid var(--color-border-glass);
   background: rgb(255 255 255 / 52%);
   box-shadow: 0 6px 16px rgb(43 36 31 / 5%);
@@ -1172,7 +1172,7 @@ a[href] {
 
 .switcher-shell {
   position: fixed;
-  inset: 56px 0 0;
+  inset: calc(var(--menu-bar-height) + var(--safe-area-top)) 0 0;
   z-index: var(--z-switcher-veil);
   display: flex;
   flex-direction: column;
@@ -1515,7 +1515,7 @@ a[href] {
 
 .switcher-controls {
   position: absolute;
-  bottom: 30px;
+  bottom: calc(30px + var(--safe-area-bottom));
   z-index: var(--z-switcher-controls);
   display: flex;
   min-height: 70px;
@@ -1743,6 +1743,10 @@ a[href] {
 /* Mobile */
 
 @media (max-width: 767px) {
+  :root {
+    --menu-bar-height: 52px;
+  }
+
   body {
     overflow: auto;
   }
@@ -1766,8 +1770,8 @@ a[href] {
   }
 
   .monitor-wrap {
-    width: 88vw;
-    translate: 0 -7vh;
+    width: 92vw;
+    translate: 0 -2vh;
   }
 
   .monitor {
@@ -1791,8 +1795,8 @@ a[href] {
   }
 
   .menu-bar {
-    height: 52px;
-    padding: 0 var(--space-4);
+    height: calc(var(--menu-bar-height) + var(--safe-area-top));
+    padding: var(--safe-area-top) var(--space-4) 0;
   }
 
   .menu-left {
@@ -1817,16 +1821,23 @@ a[href] {
   }
 
   .desktop-surface {
-    padding-top: 52px;
+    padding-top: calc(var(--menu-bar-height) + var(--safe-area-top));
   }
 
   .desktop-home {
     display: flex;
-    min-height: calc(100svh - 52px);
+    min-height: calc(100svh - var(--menu-bar-height) - var(--safe-area-top));
     flex-direction: column;
     gap: var(--space-4);
     overflow: auto;
-    padding: var(--space-4) var(--space-4) 144px;
+    overscroll-behavior: contain;
+    padding: var(--space-4) var(--space-4) calc(112px + var(--safe-area-bottom));
+  }
+
+  .experience-root[data-app-open="true"] .desktop-home {
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
   }
 
   .desktop-monogram {
@@ -1853,23 +1864,26 @@ a[href] {
   }
 
   .about-window {
-    min-height: 292px;
+    min-height: 250px;
   }
 
   .blog-window {
-    min-height: 330px;
+    min-height: 300px;
   }
 
   .window-content {
-    padding: var(--space-6);
+    padding: var(--space-5);
   }
 
   .about-window .window-content {
-    min-height: 238px;
+    min-height: 196px;
+    gap: var(--space-5);
   }
 
   .about-window p {
+    font-family: "IBM Plex Sans KR", "IBM Plex Mono", ui-monospace, monospace;
     font-size: 16px;
+    line-height: 1.65;
   }
 
   .recent-posts strong {
@@ -1883,13 +1897,16 @@ a[href] {
     z-index: var(--z-window);
     width: 92%;
     min-width: 0;
+    height: auto;
+    min-height: 156px;
     align-self: center;
+    padding: var(--space-6);
   }
 
   .dock {
     position: fixed;
     right: 10px;
-    bottom: 10px;
+    bottom: calc(10px + var(--safe-area-bottom));
     left: 10px;
     z-index: var(--z-dock);
     min-height: 82px;
@@ -1898,6 +1915,14 @@ a[href] {
     padding: 9px;
     translate: 0;
     border-radius: 26px;
+    transition:
+      opacity var(--motion-reduced) ease,
+      visibility var(--motion-reduced) ease;
+  }
+
+  .experience-root[data-app-open="true"] .dock {
+    visibility: hidden;
+    opacity: 0;
   }
 
   .dock-apps,
@@ -1945,9 +1970,22 @@ a[href] {
     height: 8px;
   }
 
-  .app-window {
-    inset: 70px 12px 102px;
-    border-radius: 22px;
+  .app-window,
+  .app-window[data-maximized="true"] {
+    inset: calc(var(--menu-bar-height) + var(--safe-area-top)) 0 0;
+    border-color: transparent;
+    border-radius: 0;
+    background: var(--color-bg-canvas-soft);
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .app-window-header {
+    padding-inline: var(--space-5);
+  }
+
+  .app-window .traffic-light-maximize {
+    display: none;
   }
 
   .app-window-header > div > span:last-child {
@@ -1955,7 +1993,9 @@ a[href] {
   }
 
   .app-window-body {
-    padding: var(--space-6);
+    overscroll-behavior: contain;
+    padding: var(--space-6) var(--space-5) calc(var(--space-8) + var(--safe-area-bottom));
+    -webkit-overflow-scrolling: touch;
   }
 
   .app-window-body > h1 {
@@ -1982,17 +2022,21 @@ a[href] {
   }
 
   .switcher-shell {
-    inset: 52px 0 0;
+    inset: calc(var(--menu-bar-height) + var(--safe-area-top)) 0 0;
   }
 
   .switcher-helper {
+    width: calc(100% - 32px);
     margin-top: 38px;
+    text-align: center;
+    line-height: 1.5;
+    letter-spacing: 0.12em;
   }
 
   .reel-stage {
     width: 94vw;
     height: clamp(250px, 43vh, 350px);
-    margin-top: 60px;
+    margin-top: clamp(96px, 17vh, 138px);
   }
 
   .reel-track {
@@ -2012,7 +2056,7 @@ a[href] {
   }
 
   .switcher-controls {
-    bottom: 12px;
+    bottom: calc(12px + var(--safe-area-bottom));
     max-width: calc(100vw - 24px);
     min-height: 72px;
     gap: 6px;

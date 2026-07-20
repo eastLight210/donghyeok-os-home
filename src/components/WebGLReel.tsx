@@ -23,6 +23,8 @@ const CYLINDER_HEIGHT = 3.25;
 const PANEL_GAP_ANGLE = Math.PI / 110;
 const PANEL_RADIAL_SEGMENTS = 36;
 const CAMERA_Z = 12.8;
+const PORTRAIT_CAMERA_Z = 15.8;
+const PORTRAIT_ASPECT_THRESHOLD = 1.15;
 
 const INNER_SHELL_DIM = 0x8f8a94;
 const EDGE_SHELL_COLOR = 0xe9e2d6;
@@ -967,6 +969,10 @@ function WebGLReelComponent(
           const height = Math.max(1, canvas.clientHeight);
           renderer.setSize(width, height, false);
           camera.aspect = width / height;
+          camera.position.z = camera.aspect < PORTRAIT_ASPECT_THRESHOLD
+            ? PORTRAIT_CAMERA_Z
+            : CAMERA_Z;
+          camera.lookAt(0, 0.35, 0);
           camera.updateProjectionMatrix();
         };
         resizeObserver = new ResizeObserver(resize);

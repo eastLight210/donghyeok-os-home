@@ -73,6 +73,67 @@ function useSystemTime() {
   return time;
 }
 
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(query);
+    const update = () => setMatches(mediaQuery.matches);
+
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, [query]);
+
+  return matches;
+}
+
+function useViewportScrollLock(locked: boolean) {
+  useEffect(() => {
+    if (!locked) return;
+
+    const root = document.documentElement;
+    const body = document.body;
+    const scrollY = window.scrollY;
+    const previous = {
+      rootOverflow: root.style.overflow,
+      rootOverscrollBehavior: root.style.overscrollBehavior,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyRight: body.style.right,
+      bodyLeft: body.style.left,
+      bodyWidth: body.style.width,
+      bodyOverflow: body.style.overflow,
+      bodyOverscrollBehavior: body.style.overscrollBehavior,
+    };
+
+    body.dataset.scrollLocked = "true";
+    root.style.overflow = "hidden";
+    root.style.overscrollBehavior = "none";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.right = "0";
+    body.style.left = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+
+    return () => {
+      delete body.dataset.scrollLocked;
+      root.style.overflow = previous.rootOverflow;
+      root.style.overscrollBehavior = previous.rootOverscrollBehavior;
+      body.style.position = previous.bodyPosition;
+      body.style.top = previous.bodyTop;
+      body.style.right = previous.bodyRight;
+      body.style.left = previous.bodyLeft;
+      body.style.width = previous.bodyWidth;
+      body.style.overflow = previous.bodyOverflow;
+      body.style.overscrollBehavior = previous.bodyOverscrollBehavior;
+      if (scrollY > 0) window.scrollTo(0, scrollY);
+    };
+  }, [locked]);
+}
+
 function TrafficLights({
   onClose,
   onMaximize,
@@ -120,6 +181,8 @@ function TrafficLights({
 }
 
 function BootDesk({ onEnter }: { onEnter: () => void }) {
+  const coarsePointer = useMediaQuery("(pointer: coarse)");
+
   return (
     <motion.main
       className="boot-scene"
@@ -161,7 +224,9 @@ function BootDesk({ onEnter }: { onEnter: () => void }) {
               <span className="login-name-animated" aria-hidden="true">
                 <span>Donghyeok</span>
               </span>
-              <span className="login-helper">CLICK OR PRESS ENTER</span>
+              <span className="login-helper">
+                {coarsePointer ? "TAP TO ENTER" : "CLICK OR PRESS ENTER"}
+              </span>
             </span>
           </span>
           <span className="monitor-chin">
@@ -487,6 +552,7 @@ function AppContent({ appId }: { appId: PublicAppId }) {
 function AppWindow({ appId, onClose }: { appId: PublicAppId; onClose: () => void }) {
   const app = getPublicApp(appId);
   const [isMaximized, setIsMaximized] = useState(false);
+  const coarsePointer = useMediaQuery("(pointer: coarse)");
 
   return (
     <motion.section
@@ -514,7 +580,9 @@ function AppWindow({ appId, onClose }: { appId: PublicAppId; onClose: () => void
           />
           <span>{app.label.toLowerCase()} — ~/donghyeok</span>
         </div>
-        <span className="app-window-shortcut">ESC CLOSE</span>
+        <span className="app-window-shortcut">
+          {coarsePointer ? "TAP × TO CLOSE" : "ESC CLOSE"}
+        </span>
       </header>
       <div className="app-window-body">
         <p className="app-eyebrow">{app.preview.eyebrow}</p>
@@ -541,6 +609,7 @@ function AppSwitcher({
   dialogRef: RefObject<HTMLElement | null>;
 }) {
   const prefersReducedMotion = useReducedMotion();
+  const coarsePointer = useMediaQuery("(pointer: coarse)");
   const selectedIndex = publicApps.findIndex((app) => app.id === selectedApp);
   const selected = getPublicApp(selectedApp);
   const reelItems = Array.from(
@@ -794,7 +863,11 @@ function AppSwitcher({
     >
       <div className="switcher-veil" aria-hidden="true" />
       <p className="switcher-helper">
-        ← → CHOOSE AN APP &nbsp;·&nbsp; ENTER OPEN &nbsp;·&nbsp; ESC BACK TO DESKTOP
+        {coarsePointer ? (
+          <>SWIPE &nbsp;·&nbsp; TAP TO OPEN</>
+        ) : (
+          <>← → CHOOSE AN APP &nbsp;·&nbsp; ENTER OPEN &nbsp;·&nbsp; ESC BACK TO DESKTOP</>
+        )}
       </p>
       <motion.div
         className="reel-stage"
@@ -929,10 +1002,10 @@ function AppSwitcher({
         </div>
         <span className="control-divider" aria-hidden="true" />
         <button type="button" className="open-control" onClick={onOpen}>
-          ↳ OPEN
+          {coarsePointer ? "OPEN" : "↳ OPEN"}
         </button>
         <button type="button" className="close-control" onClick={onClose}>
-          ESC CLOSE
+          {coarsePointer ? "CLOSE" : "ESC CLOSE"}
         </button>
       </div>
     </motion.section>
@@ -966,6 +1039,10 @@ export default function DonghyeokOS() {
   const isSwitcher = state.name === "switcher";
   const selectedSwitcherApp = state.name === "switcher" ? state.selectedApp : null;
   const activeApp = state.name === "desktop" ? state.activeApp : null;
+  const isAppOpen = state.name === "opening-app" || Boolean(activeApp);
+  const shouldLockScroll = isSwitcher || isAppOpen;
+
+  useViewportScrollLock(shouldLockScroll);
 
   const routeApp = useCallback(() => {
     const value = new URLSearchParams(window.location.search).get("app");
@@ -1110,7 +1187,12 @@ export default function DonghyeokOS() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="experience-root" data-state={state.name}>
+      <div
+        className="experience-root"
+        data-state={state.name}
+        data-scroll-locked={shouldLockScroll || undefined}
+        data-app-open={isAppOpen || undefined}
+      >
       <AnimatePresence mode="wait">
         {state.name === "boot" ? (
           <BootDesk key="boot" onEnter={() => dispatch({ type: "ENTER" })} />

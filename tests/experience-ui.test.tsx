@@ -6,10 +6,14 @@ import DonghyeokOS from "@/src/components/DonghyeokOS";
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean })
   .IS_REACT_ACT_ENVIRONMENT = true;
 
+let coarsePointer = false;
+
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
-    matches: query.includes("prefers-reduced-motion"),
+    matches:
+      query.includes("prefers-reduced-motion")
+      || (coarsePointer && query.includes("pointer: coarse")),
     media: query,
     onchange: null,
     addEventListener: vi.fn(),
@@ -47,6 +51,7 @@ describe("DonghyeokOS UI contract", () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
+    coarsePointer = false;
     warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     window.sessionStorage.clear();
     window.history.replaceState({}, "", "/");
@@ -91,6 +96,7 @@ describe("DonghyeokOS UI contract", () => {
 
     const dialog = document.querySelector('[role="dialog"][aria-modal="true"]');
     expect(dialog).not.toBeNull();
+    expect(document.body.dataset.scrollLocked).toBe("true");
     expect(document.querySelector(".reel-webgl-canvas")).not.toBeNull();
     expect(document.querySelector(".switch-word")).toBeNull();
     expect(document.querySelector(".switcher-helper")?.textContent).toContain(
@@ -140,6 +146,40 @@ describe("DonghyeokOS UI contract", () => {
     });
     expect(document.querySelector('[role="dialog"]')).toBeNull();
     expect(document.activeElement).toBe(launcher);
+    expect(document.body.dataset.scrollLocked).toBeUndefined();
+  });
+
+  it("uses touch-first helper copy on coarse pointers", async () => {
+    coarsePointer = true;
+    await act(async () => root.render(<DonghyeokOS />));
+
+    expect(document.querySelector(".login-helper")?.textContent).toBe(
+      "TAP TO ENTER",
+    );
+
+    await act(async () => {
+      document
+        .querySelector<HTMLButtonElement>(
+          '[aria-label="Enter DonghyeokOS as Donghyeok"]',
+        )
+        ?.click();
+      await vi.advanceTimersByTimeAsync(220);
+    });
+    await act(async () => {
+      document
+        .querySelector<HTMLButtonElement>('[aria-label="Open App Switcher"]')
+        ?.click();
+      await vi.advanceTimersByTimeAsync(1);
+    });
+
+    expect(document.querySelector(".switcher-helper")?.textContent).toContain(
+      "SWIPE",
+    );
+    expect(document.querySelector(".switcher-helper")?.textContent).toContain(
+      "TAP TO OPEN",
+    );
+    expect(document.querySelector(".open-control")?.textContent).toBe("OPEN");
+    expect(document.querySelector(".close-control")?.textContent).toBe("CLOSE");
   });
 
   it("enters from Enter without requiring monitor focus", async () => {
@@ -182,6 +222,10 @@ describe("DonghyeokOS UI contract", () => {
     expect(document.querySelector('.contact-links a[href="https://github.com/eastLight210"]')).not.toBeNull();
     expect(closeButton?.textContent).toBe("");
     expect(document.querySelector(".app-window")).not.toBeNull();
+    expect(document.body.dataset.scrollLocked).toBe("true");
+    expect(
+      document.querySelector(".experience-root")?.getAttribute("data-app-open"),
+    ).toBe("true");
     expect(document.querySelector(".app-window-shortcut")?.textContent).toBe(
       "ESC CLOSE",
     );
@@ -204,6 +248,7 @@ describe("DonghyeokOS UI contract", () => {
 
     await act(async () => closeButton?.click());
     expect(window.location.search).toBe("");
+    expect(document.body.dataset.scrollLocked).toBeUndefined();
   });
 
   it("closes an app window with Escape", async () => {
