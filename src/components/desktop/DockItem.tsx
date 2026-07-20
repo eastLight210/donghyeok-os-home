@@ -33,6 +33,19 @@ export interface DockMagnification {
   y: number;
 }
 
+export interface LaunchOrigin {
+  x: number;
+  y: number;
+}
+
+export function elementLaunchOrigin(element: Element): LaunchOrigin {
+  const bounds = element.getBoundingClientRect();
+  return {
+    x: bounds.left + bounds.width / 2,
+    y: bounds.top + bounds.height / 2,
+  };
+}
+
 export function getDockMagnification(
   pointerX: number,
   itemCenterX: number,
@@ -135,7 +148,7 @@ function InternalDockItem({
   app: PublicApp;
   pointerX: MotionValue<number>;
   reducedMotion: boolean;
-  onOpen: () => void;
+  onOpen: (origin: LaunchOrigin) => void;
 }) {
   const { itemRef, style } = useDockItemMagnification<HTMLButtonElement>(
     pointerX,
@@ -148,7 +161,7 @@ function InternalDockItem({
       data-dock-magnify
       data-tone={app.tone}
       type="button"
-      onClick={onOpen}
+      onClick={(event) => onOpen(elementLaunchOrigin(event.currentTarget))}
       ref={itemRef}
       aria-label={`Open ${app.label}`}
     >
@@ -189,7 +202,7 @@ export function DockItem(props: {
   app: PublicApp;
   pointerX: MotionValue<number>;
   reducedMotion: boolean;
-  onOpen: () => void;
+  onOpen: (origin: LaunchOrigin) => void;
 }) {
   if (props.app.kind === "external" && props.app.href) {
     return <ExternalDockItem {...props} />;

@@ -26,6 +26,10 @@ import {
 } from "@/src/components/WebGLReel";
 import { Dock } from "@/src/components/desktop/Dock";
 import {
+  elementLaunchOrigin,
+  type LaunchOrigin,
+} from "@/src/components/desktop/DockItem";
+import {
   experienceReducer,
   initialExperienceState,
 } from "@/src/app/experience-machine";
@@ -320,7 +324,7 @@ function DesktopHome({
   launcherRef,
   receded,
 }: {
-  onOpenApp: (id: PublicAppId) => void;
+  onOpenApp: (id: PublicAppId, origin?: LaunchOrigin) => void;
   onOpenSwitcher: () => void;
   onPower: () => void;
   launcherRef: RefObject<HTMLButtonElement | null>;
@@ -364,7 +368,9 @@ function DesktopHome({
       <button
         type="button"
         className="now-note"
-        onClick={() => onOpenApp("now")}
+        onClick={(event) =>
+          onOpenApp("now", elementLaunchOrigin(event.currentTarget))
+        }
         aria-label="Open Now"
       >
         <span>NOW</span>
@@ -1093,13 +1099,30 @@ function AppSwitcher({
   );
 }
 
-function OpeningApp({ appId }: { appId: PublicAppId }) {
+function OpeningApp({
+  appId,
+  origin,
+}: {
+  appId: PublicAppId;
+  origin: LaunchOrigin | null;
+}) {
   const app = getPublicApp(appId);
+  const offset = origin
+    ? {
+        x: origin.x - window.innerWidth / 2,
+        y: origin.y - window.innerHeight / 2,
+      }
+    : { x: 0, y: 60 };
   return (
     <motion.div
       className="opening-app"
-      initial={{ opacity: 0, y: 60, scale: 0.72 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{
+        opacity: 0,
+        x: offset.x,
+        y: offset.y,
+        scale: origin ? 0.24 : 0.72,
+      }}
+      animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 1.04 }}
       transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
       data-tone={app.tone}
@@ -1114,6 +1137,7 @@ function OpeningApp({ appId }: { appId: PublicAppId }) {
 
 export default function DonghyeokOS() {
   const [state, dispatch] = useReducer(experienceReducer, initialExperienceState);
+  const [launchOrigin, setLaunchOrigin] = useState<LaunchOrigin | null>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const switcherRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
@@ -1135,6 +1159,16 @@ export default function DonghyeokOS() {
   const closeApp = useCallback(() => {
     window.history.pushState({}, "", "/");
     dispatch({ type: "NAVIGATE", appId: null });
+  }, []);
+
+  const openApp = useCallback((appId: PublicAppId, origin?: LaunchOrigin) => {
+    setLaunchOrigin(origin ?? null);
+    dispatch({ type: "OPEN_APP", appId });
+  }, []);
+
+  const openSelected = useCallback(() => {
+    setLaunchOrigin(null);
+    dispatch({ type: "OPEN_SELECTED" });
   }, []);
 
   useEffect(() => {
@@ -1228,7 +1262,7 @@ export default function DonghyeokOS() {
         document.activeElement?.getAttribute("role") === "option"
       ) {
         event.preventDefault();
-        dispatch({ type: "OPEN_SELECTED" });
+        openSelected();
       } else if (event.key === "Tab" && switcherRef.current) {
         const focusable = Array.from(
           switcherRef.current.querySelectorAll<HTMLElement>(
@@ -1250,7 +1284,7 @@ export default function DonghyeokOS() {
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isSwitcher, selectedSwitcherApp]);
+  }, [isSwitcher, selectedSwitcherApp, openSelected]);
 
   useEffect(() => {
     if (!activeApp) return;
@@ -1315,7 +1349,7 @@ export default function DonghyeokOS() {
             aria-hidden={isSwitcher || undefined}
           >
             <DesktopHome
-              onOpenApp={(appId) => dispatch({ type: "OPEN_APP", appId })}
+              onOpenApp={openApp}
               onOpenSwitcher={() => dispatch({ type: "OPEN_SWITCHER" })}
               onPower={powerOff}
               launcherRef={launcherRef}
@@ -1335,7 +1369,7 @@ export default function DonghyeokOS() {
                 selectedApp={state.selectedApp}
                 onSelect={(appId) => dispatch({ type: "SELECT_APP", appId })}
                 onRotate={(direction) => dispatch({ type: "ROTATE", direction })}
-                onOpen={() => dispatch({ type: "OPEN_SELECTED" })}
+                onOpen={openSelected}
                 onClose={() => {
                   dispatch({ type: "CANCEL_SWITCHER" });
                   window.setTimeout(() => launcherRef.current?.focus(), 0);
@@ -1344,7 +1378,11 @@ export default function DonghyeokOS() {
               />
             ) : null}
             {state.name === "opening-app" ? (
-              <OpeningApp key="opening" appId={state.selectedApp} />
+              <OpeningApp
+                key="opening"
+                appId={state.selectedApp}
+                origin={launchOrigin}
+              />
             ) : null}
           </AnimatePresence>
         </main>

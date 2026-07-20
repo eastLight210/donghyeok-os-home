@@ -9,7 +9,7 @@ import {
   type RefObject,
 } from "react";
 import { publicApps, type PublicAppId } from "@/src/content/public-apps";
-import { DockItem, DockSystemControl } from "./DockItem";
+import { DockItem, DockSystemControl, type LaunchOrigin } from "./DockItem";
 
 function findDockItem(target: EventTarget | null) {
   return target instanceof Element
@@ -28,7 +28,7 @@ export function Dock({
   onPower,
   launcherRef,
 }: {
-  onOpenApp: (id: PublicAppId) => void;
+  onOpenApp: (id: PublicAppId, origin: LaunchOrigin) => void;
   onOpenSwitcher: () => void;
   onPower: () => void;
   launcherRef: RefObject<HTMLButtonElement | null>;
@@ -100,7 +100,7 @@ export function Dock({
           <DockItem
             app={app}
             key={app.id}
-            onOpen={() => onOpenApp(app.id)}
+            onOpen={(origin) => onOpenApp(app.id, origin)}
             pointerX={pointerX}
             reducedMotion={reducedMotion}
           />
