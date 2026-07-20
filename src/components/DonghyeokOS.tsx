@@ -48,6 +48,8 @@ const REEL_CYCLE_COUNT = 15;
 const REEL_CENTER_CYCLE = Math.floor(REEL_CYCLE_COUNT / 2);
 const REEL_DRAG_ACTIVATION_DISTANCE = 6;
 const REEL_WHEEL_IDLE_DELAY = 140;
+const REEL_WHEEL_LOCK_DURATION = 180;
+const REEL_WHEEL_ACCUMULATION_DECAY = 0.72;
 
 function getNearestReelIndex(currentIndex: number, selectedIndex: number) {
   const cycle = Math.round((currentIndex - selectedIndex) / publicApps.length);
@@ -641,6 +643,7 @@ function AppSwitcher({
   const wheelOffsetRef = useRef(0);
   const wheelGestureHandledRef = useRef(false);
   const wheelIdleTimerRef = useRef<number | null>(null);
+  const wheelUnlockTimerRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
   const snapFrameRef = useRef<number | null>(null);
   const normalizationTimerRef = useRef<number | null>(null);
@@ -758,7 +761,6 @@ function AppSwitcher({
 
     const finishWheelGesture = () => {
       wheelIdleTimerRef.current = null;
-      wheelGestureHandledRef.current = false;
       wheelOffsetRef.current = 0;
       if (stage.dataset.dragging) snapWheelToCenter();
     };
@@ -803,7 +805,8 @@ function AppSwitcher({
         -maxOffset,
         Math.min(
           maxOffset,
-          wheelOffsetRef.current - event.deltaX * deltaMultiplier,
+          wheelOffsetRef.current * REEL_WHEEL_ACCUMULATION_DECAY
+            - event.deltaX * deltaMultiplier,
         ),
       );
 
@@ -819,6 +822,15 @@ function AppSwitcher({
         flushSync(() => rotateReelRef.current(direction));
         setTrackDragOffset(offset + direction * segmentWidth);
         snapWheelToCenter();
+        if (wheelIdleTimerRef.current !== null) {
+          window.clearTimeout(wheelIdleTimerRef.current);
+          wheelIdleTimerRef.current = null;
+        }
+        wheelUnlockTimerRef.current = window.setTimeout(() => {
+          wheelGestureHandledRef.current = false;
+          wheelUnlockTimerRef.current = null;
+        }, REEL_WHEEL_LOCK_DURATION);
+        return;
       }
 
       scheduleWheelGestureEnd();
@@ -830,6 +842,10 @@ function AppSwitcher({
       if (wheelIdleTimerRef.current !== null) {
         window.clearTimeout(wheelIdleTimerRef.current);
         wheelIdleTimerRef.current = null;
+      }
+      if (wheelUnlockTimerRef.current !== null) {
+        window.clearTimeout(wheelUnlockTimerRef.current);
+        wheelUnlockTimerRef.current = null;
       }
       wheelOffsetRef.current = 0;
       wheelGestureHandledRef.current = false;

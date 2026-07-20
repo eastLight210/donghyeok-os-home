@@ -496,6 +496,22 @@ describe("DonghyeokOS UI contract", () => {
     expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("0px");
 
     await act(async () => vi.advanceTimersByTimeAsync(140));
+
+    await act(async () => {
+      for (let index = 0; index < 8; index += 1) {
+        stage.dispatchEvent(wheelEvent({ deltaX: 2, deltaY: 0 }));
+      }
+    });
+    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
+      "Now",
+    );
+
+    const nextGesture = wheelEvent({ deltaX: 60, deltaY: 4 });
+    await act(async () => stage.dispatchEvent(nextGesture));
+    expect(nextGesture.defaultPrevented).toBe(true);
+    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
+      "Contact",
+    );
   });
 
   it("tilts the reel and offsets its reflection with pointer position", async () => {
