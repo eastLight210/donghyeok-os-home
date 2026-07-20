@@ -352,6 +352,27 @@ function drawCoverImage(
   );
 }
 
+let cachedAtlasEntry: {
+  apps: readonly PublicApp[];
+  promise: Promise<HTMLCanvasElement>;
+} | null = null;
+
+function getReelAtlas(apps: readonly PublicApp[]) {
+  if (cachedAtlasEntry?.apps === apps) return cachedAtlasEntry.promise;
+  const promise = createReelAtlas(apps);
+  const entry = { apps, promise };
+  cachedAtlasEntry = entry;
+  promise.catch(() => {
+    if (cachedAtlasEntry === entry) cachedAtlasEntry = null;
+  });
+  return promise;
+}
+
+export function preloadReelAssets(apps: readonly PublicApp[]) {
+  void import("three");
+  getReelAtlas(apps).catch(() => {});
+}
+
 async function createReelAtlas(apps: readonly PublicApp[]) {
   const [images] = await Promise.all([
     Promise.all(apps.map((app) => loadImage(app.reelImage))),
@@ -503,7 +524,7 @@ function WebGLReelComponent(
       try {
         const [THREE, atlas] = await Promise.all([
           import("three"),
-          createReelAtlas(apps),
+          getReelAtlas(apps),
         ]);
         if (disposed) return;
 

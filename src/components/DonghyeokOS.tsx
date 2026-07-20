@@ -21,6 +21,7 @@ import {
 import { flushSync } from "react-dom";
 import {
   WebGLReel,
+  preloadReelAssets,
   type WebGLReelHandle,
 } from "@/src/components/WebGLReel";
 import {
@@ -619,7 +620,9 @@ function AppSwitcher({
   const [visualReelIndex, setVisualReelIndex] = useState(
     REEL_CENTER_CYCLE * publicApps.length + selectedIndex,
   );
-  const [webglReady, setWebglReady] = useState(false);
+  const [webglStatus, setWebglStatus] = useState<
+    "pending" | "ready" | "fallback"
+  >("pending");
   const accessibleCycleStart =
     Math.floor(visualReelIndex / publicApps.length) * publicApps.length;
   const stageRef = useRef<HTMLDivElement>(null);
@@ -640,8 +643,11 @@ function AppSwitcher({
     "--reel-track-width": `${reelItems.length * 96}%`,
     "--reel-track-width-mobile": `${reelItems.length * 84}%`,
   } as CSSProperties;
-  const handleWebGLReady = useCallback(() => setWebglReady(true), []);
-  const handleWebGLUnavailable = useCallback(() => setWebglReady(false), []);
+  const handleWebGLReady = useCallback(() => setWebglStatus("ready"), []);
+  const handleWebGLUnavailable = useCallback(
+    () => setWebglStatus("fallback"),
+    [],
+  );
 
   const rotateReel = useCallback((direction: -1 | 1) => {
     setVisualReelIndex((currentIndex) => currentIndex + direction);
@@ -872,9 +878,13 @@ function AppSwitcher({
       <motion.div
         className="reel-stage"
         ref={stageRef}
-        data-webgl-ready={webglReady || undefined}
+        data-webgl-ready={webglStatus === "ready" || undefined}
         initial={{ opacity: 0, y: 74, scaleY: 0.78 }}
-        animate={{ opacity: 1, y: 0, scaleY: 1 }}
+        animate={
+          webglStatus === "pending"
+            ? { opacity: 0, y: 74, scaleY: 0.78 }
+            : { opacity: 1, y: 0, scaleY: 1 }
+        }
         exit={{ opacity: 0, y: 46, scaleY: 0.86 }}
         transition={{ duration: 0.58, ease: [0.16, 1, 0.3, 1] }}
         onPointerDown={handlePointerDown}
@@ -1054,6 +1064,17 @@ export default function DonghyeokOS() {
   const closeApp = useCallback(() => {
     window.history.pushState({}, "", "/");
     dispatch({ type: "NAVIGATE", appId: null });
+  }, []);
+
+  useEffect(() => {
+    if (typeof window.requestIdleCallback === "function") {
+      const handle = window.requestIdleCallback(() =>
+        preloadReelAssets(publicApps),
+      );
+      return () => window.cancelIdleCallback(handle);
+    }
+    const timer = window.setTimeout(() => preloadReelAssets(publicApps), 400);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
