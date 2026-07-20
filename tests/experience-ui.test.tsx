@@ -45,6 +45,21 @@ function pointerEvent(
   return event;
 }
 
+function wheelEvent({
+  deltaX,
+  deltaY = 0,
+}: {
+  deltaX: number;
+  deltaY?: number;
+}) {
+  return new WheelEvent("wheel", {
+    bubbles: true,
+    cancelable: true,
+    deltaX,
+    deltaY,
+  });
+}
+
 describe("DonghyeokOS UI contract", () => {
   let root: Root;
   let warnSpy: ReturnType<typeof vi.spyOn>;
@@ -407,6 +422,70 @@ describe("DonghyeokOS UI contract", () => {
     await act(async () => {
       stage.dispatchEvent(pointerEvent("pointerup", { clientX: 350 }));
     });
+    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
+      "Now",
+    );
+
+    await act(async () => vi.advanceTimersByTimeAsync(40));
+    expect(stage.dataset.dragging).toBeUndefined();
+    expect(track.style.getPropertyValue("--drag-offset")).toBe("0px");
+    expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("0px");
+  });
+
+  it("rotates from a horizontal trackpad gesture without hijacking vertical wheel input", async () => {
+    await act(async () => root.render(<DonghyeokOS />));
+
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+      await vi.advanceTimersByTimeAsync(220);
+    });
+    await act(async () => {
+      document
+        .querySelector<HTMLButtonElement>('[aria-label="Open App Switcher"]')
+        ?.click();
+      await vi.advanceTimersByTimeAsync(1);
+    });
+
+    const stage = document.querySelector<HTMLDivElement>(".reel-stage");
+    const track = document.querySelector<HTMLDivElement>(".reel-track");
+    const reflectionTrack = document.querySelector<HTMLDivElement>(
+      ".reel-reflection-track",
+    );
+    expect(stage).not.toBeNull();
+    expect(track).not.toBeNull();
+    expect(reflectionTrack).not.toBeNull();
+    if (!stage || !track || !reflectionTrack) return;
+
+    Object.defineProperty(track, "getBoundingClientRect", {
+      value: () => ({
+        bottom: 300,
+        height: 300,
+        left: 0,
+        right: 9840,
+        top: 0,
+        width: 9840,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }),
+    });
+
+    const verticalWheel = wheelEvent({ deltaX: 8, deltaY: 80 });
+    await act(async () => stage.dispatchEvent(verticalWheel));
+    expect(verticalWheel.defaultPrevented).toBe(false);
+    expect(track.style.getPropertyValue("--drag-offset")).toBe("0px");
+
+    const horizontalWheel = wheelEvent({ deltaX: 60, deltaY: 4 });
+    await act(async () => stage.dispatchEvent(horizontalWheel));
+    expect(horizontalWheel.defaultPrevented).toBe(true);
+    expect(track.style.getPropertyValue("--drag-offset")).toBe("-60px");
+    expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("-60px");
+    expect(stage.dataset.dragging).toBe("true");
+    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
+      "Projects",
+    );
+
+    await act(async () => vi.advanceTimersByTimeAsync(140));
     expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
       "Now",
     );

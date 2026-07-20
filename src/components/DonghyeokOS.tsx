@@ -47,6 +47,7 @@ const ENTERED_KEY = "donghyeok-os:entered";
 const REEL_CYCLE_COUNT = 15;
 const REEL_CENTER_CYCLE = Math.floor(REEL_CYCLE_COUNT / 2);
 const REEL_DRAG_ACTIVATION_DISTANCE = 6;
+const REEL_WHEEL_IDLE_DELAY = 140;
 
 function getNearestReelIndex(currentIndex: number, selectedIndex: number) {
   const cycle = Math.round((currentIndex - selectedIndex) / publicApps.length);
@@ -637,6 +638,8 @@ function AppSwitcher({
   const activePointerRef = useRef<number | null>(null);
   const dragStartRef = useRef(0);
   const dragOffsetRef = useRef(0);
+  const wheelOffsetRef = useRef(0);
+  const wheelIdleTimerRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
   const snapFrameRef = useRef<number | null>(null);
   const normalizationTimerRef = useRef<number | null>(null);
@@ -721,17 +724,105 @@ function AppSwitcher({
     [],
   );
 
-  const getSegmentWidth = () => {
+  const getSegmentWidth = useCallback(() => {
     const trackWidth = trackRef.current?.getBoundingClientRect().width ?? 0;
-    return trackWidth / reelItems.length;
-  };
+    return trackWidth / (REEL_CYCLE_COUNT * publicApps.length);
+  }, []);
 
-  const setTrackDragOffset = (offset: number) => {
+  const setTrackDragOffset = useCallback((offset: number) => {
     const value = `${offset}px`;
     trackRef.current?.style.setProperty("--drag-offset", value);
     reflectionTrackRef.current?.style.setProperty("--drag-offset", value);
     webglReelRef.current?.setDragOffset(offset, getSegmentWidth());
-  };
+  }, [getSegmentWidth]);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const finishWheelGesture = () => {
+      wheelIdleTimerRef.current = null;
+      const offset = wheelOffsetRef.current;
+      const segmentWidth = getSegmentWidth();
+      wheelOffsetRef.current = 0;
+
+      if (!segmentWidth) {
+        delete stage.dataset.dragging;
+        setTrackDragOffset(0);
+        return;
+      }
+
+      const threshold = Math.min(88, Math.max(44, segmentWidth * 0.14));
+      const direction = Math.abs(offset) >= threshold
+        ? (offset < 0 ? 1 : -1)
+        : null;
+
+      if (direction) {
+        flushSync(() => rotateReel(direction));
+        setTrackDragOffset(offset + direction * segmentWidth);
+      }
+
+      snapFrameRef.current = window.requestAnimationFrame(() => {
+        snapFrameRef.current = window.requestAnimationFrame(() => {
+          delete stage.dataset.dragging;
+          setTrackDragOffset(0);
+          snapFrameRef.current = null;
+        });
+      });
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (
+        event.ctrlKey
+        || Math.abs(event.deltaX) <= Math.abs(event.deltaY)
+      ) return;
+
+      event.preventDefault();
+      if (snapFrameRef.current !== null) {
+        window.cancelAnimationFrame(snapFrameRef.current);
+        snapFrameRef.current = null;
+      }
+
+      const segmentWidth = getSegmentWidth();
+      if (!segmentWidth) return;
+
+      const deltaMultiplier = event.deltaMode === 1
+        ? 16
+        : event.deltaMode === 2
+          ? stage.clientWidth
+          : 1;
+      const maxOffset = segmentWidth * 1.12;
+      const offset = Math.max(
+        -maxOffset,
+        Math.min(
+          maxOffset,
+          wheelOffsetRef.current - event.deltaX * deltaMultiplier,
+        ),
+      );
+
+      wheelOffsetRef.current = offset;
+      stage.dataset.dragging = "true";
+      setTrackDragOffset(offset);
+
+      if (wheelIdleTimerRef.current !== null) {
+        window.clearTimeout(wheelIdleTimerRef.current);
+      }
+      wheelIdleTimerRef.current = window.setTimeout(
+        finishWheelGesture,
+        REEL_WHEEL_IDLE_DELAY,
+      );
+    };
+
+    stage.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      stage.removeEventListener("wheel", handleWheel);
+      if (wheelIdleTimerRef.current !== null) {
+        window.clearTimeout(wheelIdleTimerRef.current);
+        wheelIdleTimerRef.current = null;
+      }
+      wheelOffsetRef.current = 0;
+    };
+  }, [getSegmentWidth, rotateReel, setTrackDragOffset]);
 
   const updateReelTilt = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== "mouse") return;
