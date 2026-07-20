@@ -398,8 +398,11 @@ function AppContent({ appId }: { appId: PublicAppId }) {
           Essays, field notes, and ordinary days collected on my public blog.
         </p>
         <ol className="blog-app-posts">
-          {recentPosts.map((post) => (
-            <li key={post.href}>
+          {recentPosts.map((post, index) => (
+            <li
+              key={post.href}
+              style={{ "--stagger": index } as CSSProperties}
+            >
               <a href={post.href} target="_blank" rel="noreferrer">
                 <strong>{post.title}</strong>
                 <time>{post.date}</time>
@@ -414,7 +417,10 @@ function AppContent({ appId }: { appId: PublicAppId }) {
             target="_blank"
             rel="noreferrer"
           >
-            OPEN THE FULL BLOG ↗
+            OPEN THE FULL BLOG{" "}
+            <span className="link-arrow" aria-hidden="true">
+              ↗
+            </span>
           </a>
         ) : null}
       </div>
@@ -424,8 +430,11 @@ function AppContent({ appId }: { appId: PublicAppId }) {
   if (appId === "projects") {
     return (
       <div className="projects-list">
-        {projects.map((project) => (
-          <article key={project.title}>
+        {projects.map((project, index) => (
+          <article
+            key={project.title}
+            style={{ "--stagger": index } as CSSProperties}
+          >
             <div>
               <span>{project.status}</span>
               <h2>{project.title}</h2>
@@ -438,7 +447,12 @@ function AppContent({ appId }: { appId: PublicAppId }) {
                 ))}
               </ul>
               {"href" in project && project.href ? (
-                <a href={project.href}>VISIT ↗</a>
+                <a href={project.href}>
+                  VISIT{" "}
+                  <span className="link-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </a>
               ) : null}
             </footer>
           </article>
@@ -454,8 +468,8 @@ function AppContent({ appId }: { appId: PublicAppId }) {
           A small, manually maintained snapshot of what has my attention.
         </p>
         <dl>
-          {nowItems.map(({ label, value }) => (
-            <div key={label}>
+          {nowItems.map(({ label, value }, index) => (
+            <div key={label} style={{ "--stagger": index } as CSSProperties}>
               <dt>{label}</dt>
               <dd>{value}</dd>
             </div>
@@ -472,10 +486,11 @@ function AppContent({ appId }: { appId: PublicAppId }) {
         <p className="contact-lead">{contactProfile.introduction}</p>
         <p>{contactProfile.description}</p>
         <div className="contact-links" aria-label="Public contact links">
-          {contactLinks.map((link) => (
+          {contactLinks.map((link, index) => (
             <a
               href={link.href}
               key={link.label}
+              style={{ "--stagger": index } as CSSProperties}
               target={link.href.startsWith("http") ? "_blank" : undefined}
               rel={link.href.startsWith("http") ? "noreferrer" : undefined}
             >
@@ -1063,11 +1078,32 @@ function AppSwitcher({
       <div className="switcher-tether" aria-hidden="true" />
       <div className="switcher-controls" data-tone={selected.tone}>
         <span className="selected-glyph" data-tone={selected.tone} aria-hidden="true">
-          {selected.glyph}
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={selected.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.16, ease: "easeOut" }}
+            >
+              {selected.glyph}
+            </motion.span>
+          </AnimatePresence>
         </span>
         <div className="selected-meta" aria-live="polite">
-          <strong>{selected.label}</strong>
-          <span>APP {String(selectedIndex + 1).padStart(2, "0")} OF 04</span>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              className="selected-meta-copy"
+              key={selected.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.16, ease: "easeOut" }}
+            >
+              <strong>{selected.label}</strong>
+              <span>APP {String(selectedIndex + 1).padStart(2, "0")} OF 04</span>
+            </motion.div>
+          </AnimatePresence>
         </div>
         <div className="switcher-arrow-group">
           <button

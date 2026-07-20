@@ -474,6 +474,10 @@ a[href] {
   gap: var(--space-3);
 }
 
+.menu-right time {
+  font-variant-numeric: tabular-nums;
+}
+
 .status-dot {
   width: 10px;
   height: 10px;
@@ -725,11 +729,14 @@ a[href] {
   background: var(--color-surface-sticky);
   box-shadow: 0 16px 28px -10px rgb(43 36 31 / 12%);
   text-align: left;
-  transition: transform var(--motion-reduced) ease;
+  transition:
+    transform var(--motion-reduced) ease,
+    box-shadow var(--motion-reduced) ease;
 }
 
 .now-note:hover {
   transform: rotate(-1deg) translateY(-4px);
+  box-shadow: 0 22px 38px -12px rgb(43 36 31 / 18%);
 }
 
 .now-note > span {
@@ -1551,6 +1558,7 @@ a[href] {
 }
 
 .selected-glyph {
+  position: relative;
   display: grid;
   width: 52px;
   height: 52px;
@@ -1570,8 +1578,15 @@ a[href] {
 }
 
 .selected-meta {
+  position: relative;
   display: flex;
   width: 132px;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.selected-meta-copy {
+  display: flex;
   flex-direction: column;
   gap: 7px;
 }
@@ -2165,6 +2180,28 @@ a[href] {
   animation: dock-rise 440ms var(--ease-standard) 340ms backwards;
 }
 
+/* Link arrows nudge toward their destination on hover */
+
+.link-arrow {
+  display: inline-block;
+  transition: transform var(--motion-press) ease-out;
+}
+
+a:hover .link-arrow,
+a:focus-visible .link-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* App window content settles in with a short stagger */
+
+.app-window-body .blog-app-posts li,
+.app-window-body .projects-list article,
+.app-window-body .now-list dl > div,
+.app-window-body .contact-links a {
+  animation: desktop-rise 320ms var(--ease-standard)
+    calc(100ms + var(--stagger, 0) * 40ms) backwards;
+}
+
 /* Power-off — the desktop collapses like a switched-off screen */
 
 @keyframes crt-off {
@@ -2305,6 +2342,13 @@ a[href] {
 
   .experience-root[data-state="powering-off"] .desktop-shell {
     animation: power-off-fade var(--motion-reduced) ease forwards;
+  }
+
+  .app-window-body .blog-app-posts li,
+  .app-window-body .projects-list article,
+  .app-window-body .now-list dl > div,
+  .app-window-body .contact-links a {
+    animation: entrance-fade var(--motion-reduced) ease backwards;
   }
 }
 
