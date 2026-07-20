@@ -25,6 +25,7 @@ a {
 }
 
 button {
+  padding: 0;
   border: 0;
 }
 
@@ -422,6 +423,7 @@ a[href] {
 
 .desktop-home {
   position: relative;
+  min-height: calc(100dvh - var(--menu-bar-height) - var(--safe-area-top));
   overflow: hidden;
   transform-origin: 50% 58%;
   background: var(--color-bg-canvas);
@@ -706,7 +708,7 @@ a[href] {
 .now-note {
   position: absolute;
   right: max(6vw, calc((100vw - 1440px) / 2 + 78px));
-  bottom: clamp(178px, 18vh, 218px);
+  bottom: clamp(122px, calc(18vh - 56px), 162px);
   z-index: var(--z-window);
   display: flex;
   width: min(22vw, 300px);
@@ -749,9 +751,8 @@ a[href] {
   left: 50%;
   z-index: var(--z-dock);
   display: flex;
-  min-height: 118px;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-5);
   padding: 14px 20px;
   translate: -50% 0;
   border: 1px solid var(--color-border-glass);
@@ -767,20 +768,14 @@ a[href] {
 .dock-system {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-}
-
-.dock-system {
-  height: 88px;
-  align-items: flex-start;
+  gap: var(--space-5);
 }
 
 .dock-item {
   position: relative;
   display: grid;
-  width: 76px;
-  height: 88px;
-  place-items: start center;
+  width: 66px;
+  place-items: center;
   cursor: pointer;
   background: transparent;
 }
@@ -840,7 +835,8 @@ a[href] {
 
 .dock-divider {
   width: 1px;
-  height: 72px;
+  height: 56px;
+  align-self: center;
   background: var(--color-border-subtle);
 }
 
@@ -1716,12 +1712,8 @@ a[href] {
     width: 260px;
   }
 
-  .dock {
-    min-height: 108px;
-  }
-
   .dock-item {
-    width: 68px;
+    width: 60px;
   }
 
   .dock-item > span {
@@ -1748,7 +1740,8 @@ a[href] {
   }
 
   body {
-    overflow: auto;
+    overflow-x: clip;
+    overflow-y: auto;
   }
 
   .experience-root,
@@ -1781,7 +1774,7 @@ a[href] {
   }
 
   .monitor-screen {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 5 / 4;
   }
 
   .monitor-stand {
@@ -1829,8 +1822,7 @@ a[href] {
     min-height: calc(100svh - var(--menu-bar-height) - var(--safe-area-top));
     flex-direction: column;
     gap: var(--space-4);
-    overflow: auto;
-    overscroll-behavior: contain;
+    overflow-x: clip;
     padding: var(--space-4) var(--space-4) calc(112px + var(--safe-area-bottom));
   }
 
@@ -1909,12 +1901,11 @@ a[href] {
     bottom: calc(10px + var(--safe-area-bottom));
     left: 10px;
     z-index: var(--z-dock);
-    min-height: 82px;
     justify-content: center;
     gap: 7px;
-    padding: 9px;
+    padding: 10px;
     translate: 0;
-    border-radius: 26px;
+    border-radius: 24px;
     transition:
       opacity var(--motion-reduced) ease,
       visibility var(--motion-reduced) ease;
@@ -1930,13 +1921,8 @@ a[href] {
     gap: 7px;
   }
 
-  .dock-system {
-    height: 58px;
-  }
-
   .dock-item {
     width: 48px;
-    height: 58px;
   }
 
   .dock-item > span {
@@ -1951,7 +1937,7 @@ a[href] {
   }
 
   .dock-divider {
-    height: 48px;
+    height: 40px;
   }
 
   .system-control {
