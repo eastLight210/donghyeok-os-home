@@ -2165,6 +2165,45 @@ a[href] {
   animation: dock-rise 440ms var(--ease-standard) 340ms backwards;
 }
 
+/* Power-off — the desktop collapses like a switched-off screen */
+
+@keyframes crt-off {
+  0% {
+    transform: scaleY(1) scaleX(1);
+    opacity: 1;
+    filter: brightness(1);
+  }
+
+  16% {
+    transform: scaleY(1.012) scaleX(1);
+    filter: brightness(1.35);
+  }
+
+  62% {
+    transform: scaleY(0.008) scaleX(1);
+    opacity: 1;
+    filter: brightness(2.1);
+  }
+
+  100% {
+    transform: scaleY(0.008) scaleX(0.08);
+    opacity: 0;
+    filter: brightness(2.3);
+  }
+}
+
+@keyframes power-off-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+.experience-root[data-state="powering-off"] .desktop-shell {
+  transform-origin: 50% 50%;
+  pointer-events: none;
+  animation: crt-off 620ms ease-in forwards;
+}
+
 /* Press feedback — touch parity for hover-only affordances */
 
 .dock-item,
@@ -2262,6 +2301,10 @@ a[href] {
   .desktop-shell[data-entrance] .now-note,
   .desktop-shell[data-entrance] .dock {
     animation: entrance-fade var(--motion-reduced) ease backwards;
+  }
+
+  .experience-root[data-state="powering-off"] .desktop-shell {
+    animation: power-off-fade var(--motion-reduced) ease forwards;
   }
 }
 

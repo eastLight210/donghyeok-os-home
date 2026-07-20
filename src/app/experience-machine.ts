@@ -9,7 +9,8 @@ export type ExperienceState =
       selectedApp: PublicAppId;
       originApp: PublicAppId | null;
     }
-  | { name: "opening-app"; selectedApp: PublicAppId };
+  | { name: "opening-app"; selectedApp: PublicAppId }
+  | { name: "powering-off" };
 
 export type ExperienceEvent =
   | { type: "ENTER" }
@@ -23,6 +24,7 @@ export type ExperienceEvent =
   | { type: "APP_OPENED" }
   | { type: "CANCEL_SWITCHER" }
   | { type: "POWER_OFF" }
+  | { type: "POWERED_OFF" }
   | { type: "NAVIGATE"; appId: PublicAppId | null };
 
 const rotate = (current: PublicAppId, direction: -1 | 1): PublicAppId => {
@@ -82,7 +84,9 @@ export function experienceReducer(
     case "NAVIGATE":
       return { name: "desktop", activeApp: event.appId };
     case "POWER_OFF":
-      return { name: "boot" };
+      return state.name === "desktop" ? { name: "powering-off" } : state;
+    case "POWERED_OFF":
+      return state.name === "powering-off" ? { name: "boot" } : state;
     default:
       return state;
   }

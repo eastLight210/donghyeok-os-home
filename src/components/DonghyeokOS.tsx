@@ -1204,6 +1204,15 @@ export default function DonghyeokOS() {
   }, [state, reducedMotion]);
 
   useEffect(() => {
+    if (state.name !== "powering-off") return;
+    const timer = window.setTimeout(
+      () => dispatch({ type: "POWERED_OFF" }),
+      reducedMotion ? 200 : 620,
+    );
+    return () => window.clearTimeout(timer);
+  }, [state.name, reducedMotion]);
+
+  useEffect(() => {
     if (!isSwitcher || !selectedSwitcherApp) return;
     window.setTimeout(() => {
       switcherRef.current?.querySelector<HTMLElement>("[aria-selected='true']")?.focus();

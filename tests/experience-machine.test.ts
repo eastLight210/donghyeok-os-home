@@ -34,6 +34,17 @@ describe("DonghyeokOS experience machine", () => {
     });
   });
 
+  it("powers off through an explicit powering-off state", () => {
+    const poweringOff = experienceReducer(
+      { name: "desktop", activeApp: null },
+      { type: "POWER_OFF" },
+    );
+    expect(poweringOff).toEqual({ name: "powering-off" });
+    expect(experienceReducer(poweringOff, { type: "POWERED_OFF" })).toEqual({
+      name: "boot",
+    });
+  });
+
   it("returns to the origin app when the switcher is cancelled", () => {
     const state = {
       name: "switcher" as const,
