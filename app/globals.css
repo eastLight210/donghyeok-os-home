@@ -751,10 +751,12 @@ a[href] {
   left: 50%;
   z-index: var(--z-dock);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-5);
   padding: 14px 20px;
+  overflow: visible;
   translate: -50% 0;
+  isolation: isolate;
   border: 1px solid var(--color-border-glass);
   border-radius: var(--radius-dock);
   background: var(--color-surface-window-soft);
@@ -767,7 +769,7 @@ a[href] {
 .dock-apps,
 .dock-system {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-5);
 }
 
@@ -775,12 +777,13 @@ a[href] {
   position: relative;
   display: grid;
   width: 66px;
+  height: 66px;
   place-items: center;
   cursor: pointer;
   background: transparent;
 }
 
-.dock-item > span {
+.dock-item-icon {
   display: grid;
   width: 66px;
   height: 66px;
@@ -792,21 +795,18 @@ a[href] {
   font-family: "DM Serif Display", Georgia, serif;
   font-size: 28px;
   line-height: 1;
-  transition: transform var(--motion-reduced) var(--ease-standard);
-}
-
-.dock-item:hover > span,
-.dock-item:focus-visible > span {
-  transform: translateY(-8px) scale(1.05);
+  transform-origin: bottom center;
+  will-change: transform;
 }
 
 .dock-item small {
   position: absolute;
-  top: -36px;
+  right: 50%;
+  bottom: calc(100% + var(--space-10));
   z-index: 1;
   padding: 6px 9px;
   pointer-events: none;
-  transform: translateY(4px);
+  transform: translate(50%, 4px);
   border: 1px solid var(--color-border-glass);
   border-radius: var(--radius-pill);
   background: rgb(255 251 243 / 88%);
@@ -824,7 +824,7 @@ a[href] {
 
 .dock-item:hover small,
 .dock-item:focus-visible small {
-  transform: translateY(0);
+  transform: translate(50%, 0);
   opacity: 1;
 }
 
@@ -850,11 +850,13 @@ a[href] {
   border-radius: 17px;
   background: var(--color-bg-canvas-soft);
   color: var(--color-text-muted);
-  transition: transform var(--motion-reduced) var(--ease-standard), color var(--motion-reduced) ease;
+  transform-origin: bottom center;
+  transition: color var(--motion-reduced) ease;
+  will-change: transform;
 }
 
-.system-control:hover {
-  transform: translateY(-4px);
+.system-control:hover,
+.system-control:focus-visible {
   color: var(--color-accent-orange);
 }
 
@@ -1714,9 +1716,10 @@ a[href] {
 
   .dock-item {
     width: 60px;
+    height: 60px;
   }
 
-  .dock-item > span {
+  .dock-item-icon {
     width: 60px;
     height: 60px;
   }
@@ -1923,9 +1926,10 @@ a[href] {
 
   .dock-item {
     width: 48px;
+    height: 48px;
   }
 
-  .dock-item > span {
+  .dock-item-icon {
     width: 48px;
     height: 48px;
     border-radius: 13px;
@@ -2094,9 +2098,10 @@ a[href] {
 
   .dock-item {
     width: 43px;
+    height: 43px;
   }
 
-  .dock-item > span,
+  .dock-item-icon,
   .system-control {
     width: 43px;
     height: 43px;
@@ -2125,7 +2130,7 @@ a[href] {
   .desktop-home,
   .app-window,
   .reel-track,
-  .dock-item > span,
+  .dock-item-icon,
   .system-control,
   .now-note,
   .recent-posts a,
@@ -2145,6 +2150,12 @@ a[href] {
 
   .reel-reflection {
     display: none;
+  }
+
+  .dock-item-icon,
+  .system-control {
+    transform: none !important;
+    will-change: auto;
   }
 }
 

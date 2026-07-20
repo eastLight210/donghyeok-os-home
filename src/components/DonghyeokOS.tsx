@@ -24,6 +24,7 @@ import {
   preloadReelAssets,
   type WebGLReelHandle,
 } from "@/src/components/WebGLReel";
+import { Dock } from "@/src/components/desktop/Dock";
 import {
   experienceReducer,
   initialExperienceState,
@@ -309,81 +310,6 @@ function Window({
       </header>
       <div className="window-content">{children}</div>
     </section>
-  );
-}
-
-function Dock({
-  onOpenApp,
-  onOpenSwitcher,
-  onPower,
-  launcherRef,
-}: {
-  onOpenApp: (id: PublicAppId) => void;
-  onOpenSwitcher: () => void;
-  onPower: () => void;
-  launcherRef: RefObject<HTMLButtonElement | null>;
-}) {
-  return (
-    <nav className="dock" aria-label="Applications and system controls">
-      <div className="dock-apps">
-        {publicApps.map((app) =>
-          app.kind === "external" && app.href ? (
-            <a
-              className="dock-item"
-              data-tone={app.tone}
-              href={app.href}
-              key={app.id}
-              aria-label={`Open ${app.label}`}
-            >
-              <span>{app.glyph}</span>
-              <small>{app.label}</small>
-            </a>
-          ) : (
-            <button
-              className="dock-item"
-              data-tone={app.tone}
-              type="button"
-              key={app.id}
-              onClick={() => onOpenApp(app.id)}
-              aria-label={`Open ${app.label}`}
-            >
-              <span>{app.glyph}</span>
-              <small>{app.label}</small>
-            </button>
-          ),
-        )}
-      </div>
-      <span className="dock-divider" aria-hidden="true" />
-      <div className="dock-system">
-        <button
-          className="system-control launcher-control"
-          type="button"
-          onClick={onOpenSwitcher}
-          ref={launcherRef}
-          aria-label="Open App Switcher"
-        >
-          <span aria-hidden="true">
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-          </span>
-        </button>
-        <button
-          className="system-control power-control"
-          type="button"
-          onClick={onPower}
-          aria-label="Return to boot screen"
-        >
-          <span aria-hidden="true">⏻</span>
-        </button>
-      </div>
-    </nav>
   );
 }
 
