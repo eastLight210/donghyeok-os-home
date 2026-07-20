@@ -483,32 +483,25 @@ describe("DonghyeokOS UI contract", () => {
       "Now",
     );
 
-    const momentumWheel = wheelEvent({ deltaX: 60, deltaY: 4 });
-    await act(async () => stage.dispatchEvent(momentumWheel));
-    expect(momentumWheel.defaultPrevented).toBe(true);
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Now",
-    );
-
     await act(async () => vi.advanceTimersByTimeAsync(40));
     expect(stage.dataset.dragging).toBeUndefined();
     expect(track.style.getPropertyValue("--drag-offset")).toBe("0px");
     expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("0px");
 
-    await act(async () => vi.advanceTimersByTimeAsync(140));
-
     await act(async () => {
-      for (let index = 0; index < 8; index += 1) {
-        stage.dispatchEvent(wheelEvent({ deltaX: 2, deltaY: 0 }));
+      for (const deltaX of [40, 28, 18, 10, 4, 2]) {
+        await vi.advanceTimersByTimeAsync(40);
+        stage.dispatchEvent(wheelEvent({ deltaX, deltaY: 0 }));
       }
     });
     expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
       "Now",
     );
 
-    const nextGesture = wheelEvent({ deltaX: 60, deltaY: 4 });
-    await act(async () => stage.dispatchEvent(nextGesture));
-    expect(nextGesture.defaultPrevented).toBe(true);
+    await act(async () => {
+      stage.dispatchEvent(wheelEvent({ deltaX: 12, deltaY: 0 }));
+      stage.dispatchEvent(wheelEvent({ deltaX: 60, deltaY: 4 }));
+    });
     expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
       "Contact",
     );

@@ -48,8 +48,10 @@ const REEL_CYCLE_COUNT = 15;
 const REEL_CENTER_CYCLE = Math.floor(REEL_CYCLE_COUNT / 2);
 const REEL_DRAG_ACTIVATION_DISTANCE = 6;
 const REEL_WHEEL_IDLE_DELAY = 140;
-const REEL_WHEEL_LOCK_DURATION = 180;
 const REEL_WHEEL_ACCUMULATION_DECAY = 0.72;
+const REEL_WHEEL_REARM_DELAY = 180;
+const REEL_WHEEL_REARM_MIN_DELTA = 8;
+const REEL_WHEEL_REARM_ACCELERATION = 1.8;
 
 function getNearestReelIndex(currentIndex: number, selectedIndex: number) {
   const cycle = Math.round((currentIndex - selectedIndex) / publicApps.length);
@@ -642,8 +644,9 @@ function AppSwitcher({
   const dragOffsetRef = useRef(0);
   const wheelOffsetRef = useRef(0);
   const wheelGestureHandledRef = useRef(false);
+  const wheelHandledAtRef = useRef(0);
+  const wheelLastDeltaRef = useRef(0);
   const wheelIdleTimerRef = useRef<number | null>(null);
-  const wheelUnlockTimerRef = useRef<number | null>(null);
   const suppressClickRef = useRef(false);
   const snapFrameRef = useRef<number | null>(null);
   const normalizationTimerRef = useRef<number | null>(null);
@@ -761,6 +764,9 @@ function AppSwitcher({
 
     const finishWheelGesture = () => {
       wheelIdleTimerRef.current = null;
+      wheelGestureHandledRef.current = false;
+      wheelHandledAtRef.current = 0;
+      wheelLastDeltaRef.current = 0;
       wheelOffsetRef.current = 0;
       if (stage.dataset.dragging) snapWheelToCenter();
     };
@@ -782,9 +788,37 @@ function AppSwitcher({
       ) return;
 
       event.preventDefault();
+      const deltaMultiplier = event.deltaMode === 1
+        ? 16
+        : event.deltaMode === 2
+          ? stage.clientWidth
+          : 1;
+      const wheelDelta = event.deltaX * deltaMultiplier;
+
       if (wheelGestureHandledRef.current) {
-        scheduleWheelGestureEnd();
-        return;
+        const previousDelta = wheelLastDeltaRef.current;
+        const rearmReady = Date.now() - wheelHandledAtRef.current
+          >= REEL_WHEEL_REARM_DELAY;
+        const directionChanged = Math.abs(wheelDelta) >= REEL_WHEEL_REARM_MIN_DELTA
+          && Math.sign(wheelDelta) !== Math.sign(previousDelta);
+        const magnitudeIncreased = Math.abs(wheelDelta)
+          >= Math.max(
+            REEL_WHEEL_REARM_MIN_DELTA,
+            Math.abs(previousDelta) * REEL_WHEEL_REARM_ACCELERATION,
+          );
+        wheelLastDeltaRef.current = wheelDelta;
+
+        if (!rearmReady || (!directionChanged && !magnitudeIncreased)) {
+          scheduleWheelGestureEnd();
+          return;
+        }
+
+        wheelGestureHandledRef.current = false;
+        wheelOffsetRef.current = 0;
+        if (wheelIdleTimerRef.current !== null) {
+          window.clearTimeout(wheelIdleTimerRef.current);
+          wheelIdleTimerRef.current = null;
+        }
       }
 
       if (snapFrameRef.current !== null) {
@@ -795,18 +829,13 @@ function AppSwitcher({
       const segmentWidth = getSegmentWidth();
       if (!segmentWidth) return;
 
-      const deltaMultiplier = event.deltaMode === 1
-        ? 16
-        : event.deltaMode === 2
-          ? stage.clientWidth
-          : 1;
       const maxOffset = segmentWidth * 1.12;
       const offset = Math.max(
         -maxOffset,
         Math.min(
           maxOffset,
           wheelOffsetRef.current * REEL_WHEEL_ACCUMULATION_DECAY
-            - event.deltaX * deltaMultiplier,
+            - wheelDelta,
         ),
       );
 
@@ -818,19 +847,12 @@ function AppSwitcher({
       if (Math.abs(offset) >= threshold) {
         const direction = offset < 0 ? 1 : -1;
         wheelGestureHandledRef.current = true;
+        wheelHandledAtRef.current = Date.now();
+        wheelLastDeltaRef.current = wheelDelta;
         wheelOffsetRef.current = 0;
         flushSync(() => rotateReelRef.current(direction));
         setTrackDragOffset(offset + direction * segmentWidth);
         snapWheelToCenter();
-        if (wheelIdleTimerRef.current !== null) {
-          window.clearTimeout(wheelIdleTimerRef.current);
-          wheelIdleTimerRef.current = null;
-        }
-        wheelUnlockTimerRef.current = window.setTimeout(() => {
-          wheelGestureHandledRef.current = false;
-          wheelUnlockTimerRef.current = null;
-        }, REEL_WHEEL_LOCK_DURATION);
-        return;
       }
 
       scheduleWheelGestureEnd();
@@ -843,12 +865,10 @@ function AppSwitcher({
         window.clearTimeout(wheelIdleTimerRef.current);
         wheelIdleTimerRef.current = null;
       }
-      if (wheelUnlockTimerRef.current !== null) {
-        window.clearTimeout(wheelUnlockTimerRef.current);
-        wheelUnlockTimerRef.current = null;
-      }
       wheelOffsetRef.current = 0;
       wheelGestureHandledRef.current = false;
+      wheelHandledAtRef.current = 0;
+      wheelLastDeltaRef.current = 0;
     };
   }, [getSegmentWidth, setTrackDragOffset]);
 
