@@ -75,6 +75,9 @@ a[href] {
     radial-gradient(circle at 50% 34%, rgb(255 251 243 / 90%), transparent 34%),
     linear-gradient(var(--color-bg-canvas-soft) 0 65%, var(--color-bg-desk) 65% 100%);
   isolation: isolate;
+
+  /* Exit push-in scales toward the monitor, matching the entry zoom focal point */
+  transform-origin: 50% 46%;
 }
 
 .desk-surface {
@@ -369,7 +372,8 @@ a[href] {
   82%, 100% { width: 0; }
 }
 
-/* Entry transition */
+/* Entry transition — the clicked monitor screen swells into the viewport,
+   wakes with the monogram, then switches on CRT-style to reveal the desktop */
 
 .entry-transition {
   position: fixed;
@@ -378,33 +382,72 @@ a[href] {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: var(--color-bg-monitor);
+  background:
+    radial-gradient(circle at 50% 44%, rgb(217 135 53 / 7%), transparent 40%),
+    radial-gradient(circle at 50% 46%, #221a29 0%, var(--color-bg-monitor) 72%);
   color: var(--color-accent-orange);
-  transform-origin: 50% 46%;
+  transform-origin: 50% 50%;
+  will-change: transform;
 }
 
-.entry-transition > span {
+.entry-mark {
   position: relative;
-  z-index: var(--z-switcher-reel);
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+}
+
+.entry-monogram {
   font-family: "DM Serif Display", Georgia, serif;
   font-size: clamp(72px, 11vw, 160px);
+  line-height: 1;
+}
+
+.entry-caption {
+  font-size: 11px;
+  letter-spacing: 0.44em;
+  text-indent: 0.44em;
+  color: rgb(255 251 243 / 46%);
+}
+
+.entry-glow,
+.entry-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -56%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.entry-glow {
+  width: 58vmin;
+  height: 58vmin;
+  background: radial-gradient(circle, rgb(217 135 53 / 20%), transparent 62%);
 }
 
 .entry-ring {
+  width: 46vmin;
+  height: 46vmin;
+  border: 1px solid rgb(241 183 110 / 55%);
+}
+
+.entry-scanline {
   position: absolute;
-  border: 1px solid rgb(217 135 53 / 24%);
-  border-radius: 50%;
-}
-
-.entry-ring-one {
-  width: 42vmin;
-  height: 42vmin;
-}
-
-.entry-ring-two {
-  width: 70vmin;
-  height: 70vmin;
-  border-color: rgb(255 255 255 / 8%);
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 34vh;
+  translate: 0 -50%;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(255 244 224 / 28%) 38%,
+    rgb(255 251 243 / 94%) 50%,
+    rgb(255 244 224 / 28%) 62%,
+    transparent
+  );
 }
 
 /* Desktop */

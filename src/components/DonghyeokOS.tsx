@@ -199,7 +199,11 @@ function BootDesk({ onEnter }: { onEnter: () => void }) {
       className="boot-scene"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      exit={{
+        opacity: 0,
+        scale: 1.045,
+        transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+      }}
       transition={{ duration: 0.35 }}
     >
       <div className="boot-art boot-art-left" aria-hidden="true">
@@ -251,26 +255,102 @@ function BootDesk({ onEnter }: { onEnter: () => void }) {
   );
 }
 
-function EntryTransition() {
+type EntryOrigin = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+function EntryTransition({ origin }: { origin: EntryOrigin | null }) {
   const reduceMotion = useReducedMotion();
+  const wakeDelay = reduceMotion ? 0 : 0.42;
+  const zoom = useMemo(() => {
+    if (reduceMotion || !origin || !origin.width || !origin.height) return null;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    if (!viewportWidth || !viewportHeight) return null;
+    return {
+      x: origin.left + origin.width / 2 - viewportWidth / 2,
+      y: origin.top + origin.height / 2 - viewportHeight / 2,
+      scaleX: origin.width / viewportWidth,
+      scaleY: origin.height / viewportHeight,
+    };
+  }, [origin, reduceMotion]);
 
   return (
     <motion.div
       className="entry-transition"
-      initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.12, borderRadius: 28 }}
-      animate={{ opacity: 1, scale: 1, borderRadius: 0 }}
-      exit={{ opacity: 0 }}
+      initial={zoom ? { ...zoom, borderRadius: 56 } : { opacity: 0 }}
+      animate={{ opacity: 1, x: 0, y: 0, scaleX: 1, scaleY: 1, borderRadius: 0 }}
+      exit={
+        reduceMotion
+          ? { opacity: 0, transition: { duration: 0.15 } }
+          : {
+              opacity: 0,
+              scaleX: 0.9,
+              scaleY: 0.006,
+              transition: {
+                duration: 0.3,
+                ease: "easeIn",
+                opacity: { delay: 0.22, duration: 0.08 },
+              },
+            }
+      }
       transition={{
-        duration: reduceMotion ? 0.18 : 0.9,
+        duration: reduceMotion ? 0.18 : 0.58,
         ease: [0.22, 1, 0.36, 1],
       }}
       role="status"
       aria-live="polite"
       aria-label="Entering DonghyeokOS"
     >
-      <div className="entry-ring entry-ring-one" aria-hidden="true" />
-      <div className="entry-ring entry-ring-two" aria-hidden="true" />
-      <span aria-hidden="true">D</span>
+      <motion.span
+        className="entry-scanline"
+        aria-hidden="true"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0 }}
+        exit={{ opacity: reduceMotion ? 0 : 1, transition: { duration: 0.1 } }}
+      />
+      <div className="entry-mark" aria-hidden="true">
+        <motion.span
+          className="entry-glow"
+          initial={{ opacity: 0, scale: 0.82 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: wakeDelay, duration: 0.5, ease: "easeOut" }}
+        />
+        <motion.span
+          className="entry-ring"
+          initial={{ opacity: 0, scale: 0.55 }}
+          animate={{ opacity: [0, 0.4, 0], scale: 1.16 }}
+          transition={{
+            delay: wakeDelay + 0.08,
+            duration: 0.62,
+            times: [0, 0.4, 1],
+            ease: "easeOut",
+          }}
+        />
+        <motion.span
+          className="entry-monogram"
+          initial={{ opacity: 0, y: reduceMotion ? 0 : 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: wakeDelay,
+            duration: 0.34,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+        >
+          D
+        </motion.span>
+        <motion.span
+          className="entry-caption"
+          initial={{ opacity: 0, y: reduceMotion ? 0 : 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: wakeDelay + 0.12, duration: 0.3, ease: "easeOut" }}
+        >
+          DONGHYEOKOS
+        </motion.span>
+      </div>
     </motion.div>
   );
 }
@@ -1174,6 +1254,7 @@ function OpeningApp({
 export default function DonghyeokOS() {
   const [state, dispatch] = useReducer(experienceReducer, initialExperienceState);
   const [launchOrigin, setLaunchOrigin] = useState<LaunchOrigin | null>(null);
+  const [entryOrigin, setEntryOrigin] = useState<EntryOrigin | null>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const switcherRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
@@ -1200,6 +1281,22 @@ export default function DonghyeokOS() {
   const openApp = useCallback((appId: PublicAppId, origin?: LaunchOrigin) => {
     setLaunchOrigin(origin ?? null);
     dispatch({ type: "OPEN_APP", appId });
+  }, []);
+
+  const enterOs = useCallback(() => {
+    const screen = document.querySelector<HTMLElement>(".monitor-screen");
+    if (screen) {
+      const rect = screen.getBoundingClientRect();
+      setEntryOrigin({
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      });
+    } else {
+      setEntryOrigin(null);
+    }
+    dispatch({ type: "ENTER" });
   }, []);
 
   const openSelected = useCallback(() => {
@@ -1236,7 +1333,7 @@ export default function DonghyeokOS() {
         window.sessionStorage.setItem(ENTERED_KEY, "true");
         dispatch({ type: "ENTERED" });
       },
-      reducedMotion ? 180 : 900,
+      reducedMotion ? 180 : 1050,
     );
     return () => window.clearTimeout(timer);
   }, [state.name, reducedMotion]);
@@ -1247,12 +1344,12 @@ export default function DonghyeokOS() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.repeat || (event.key !== "Enter" && event.key !== " ")) return;
       event.preventDefault();
-      dispatch({ type: "ENTER" });
+      enterOs();
     };
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [state.name]);
+  }, [state.name, enterOs]);
 
   useEffect(() => {
     if (state.name !== "opening-app") return;
@@ -1364,11 +1461,13 @@ export default function DonghyeokOS() {
         data-scroll-locked={shouldLockScroll || undefined}
         data-app-open={isAppOpen || undefined}
       >
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {state.name === "boot" ? (
-          <BootDesk key="boot" onEnter={() => dispatch({ type: "ENTER" })} />
+          <BootDesk key="boot" onEnter={enterOs} />
         ) : null}
-        {state.name === "entering" ? <EntryTransition key="entering" /> : null}
+        {state.name === "entering" ? (
+          <EntryTransition key="entering" origin={entryOrigin} />
+        ) : null}
       </AnimatePresence>
 
       {state.name !== "boot" && state.name !== "entering" ? (
