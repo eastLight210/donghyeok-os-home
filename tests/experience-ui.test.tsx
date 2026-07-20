@@ -90,6 +90,7 @@ describe("DonghyeokOS UI contract", () => {
       '[aria-label="Open App Switcher"]',
     );
     expect(launcher).not.toBeNull();
+    expect(launcher?.querySelectorAll("i")).toHaveLength(9);
 
     await act(async () => launcher?.click());
     await act(async () => vi.advanceTimersByTimeAsync(1));

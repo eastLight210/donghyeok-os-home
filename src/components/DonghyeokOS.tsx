@@ -362,6 +362,11 @@ function Dock({
             <i />
             <i />
             <i />
+            <i />
+            <i />
+            <i />
+            <i />
+            <i />
           </span>
         </button>
         <button

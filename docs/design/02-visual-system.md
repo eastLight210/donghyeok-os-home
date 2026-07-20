@@ -218,7 +218,7 @@ Figma component set: `8:34`
 - Glyph is editable.
 - Each icon must have a programmatic app name and a visible tooltip or label where appropriate.
 - There is no active/selected state in the first release; the menu bar communicates the active app. Do not render indicator dots.
-- The Dock also holds two system controls after a divider, distinct from app items: the launcher (2x2 grid glyph, opens the App Switcher) and the power control (returns to the login screen).
+- The Dock also holds two system controls after a divider, distinct from app items: the launcher (3x3 grid glyph, opens the App Switcher) and the power control (returns to the login screen).
 
 ### Login Account
 

@@ -860,14 +860,14 @@ a[href] {
 
 .launcher-control > span {
   display: grid;
-  grid-template-columns: repeat(2, 11px);
-  gap: 5px;
+  grid-template-columns: repeat(3, 7px);
+  gap: 3px;
 }
 
 .launcher-control i {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
   background: currentColor;
 }
 
@@ -1947,13 +1947,14 @@ a[href] {
   }
 
   .launcher-control > span {
-    grid-template-columns: repeat(2, 8px);
-    gap: 4px;
+    grid-template-columns: repeat(3, 5px);
+    gap: 2.5px;
   }
 
   .launcher-control i {
-    width: 8px;
-    height: 8px;
+    width: 5px;
+    height: 5px;
+    border-radius: 1.5px;
   }
 
   .app-window,
