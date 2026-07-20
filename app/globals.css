@@ -2112,6 +2112,59 @@ a[href] {
   }
 }
 
+/* Desktop entrance choreography — plays once when arriving from boot */
+
+@keyframes desktop-rise {
+  from {
+    translate: 0 12px;
+    opacity: 0;
+  }
+}
+
+@keyframes desktop-drop {
+  from {
+    translate: 0 -8px;
+    opacity: 0;
+  }
+}
+
+@keyframes dock-rise {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+}
+
+@keyframes entrance-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.desktop-shell[data-entrance] .menu-bar {
+  animation: desktop-drop 320ms var(--ease-standard) 100ms backwards;
+}
+
+.desktop-shell[data-entrance] .desktop-monogram {
+  animation: entrance-fade 500ms ease 100ms backwards;
+}
+
+.desktop-shell[data-entrance] .about-window {
+  animation: desktop-rise 400ms var(--ease-standard) 160ms backwards;
+}
+
+.desktop-shell[data-entrance] .blog-window {
+  animation: desktop-rise 400ms var(--ease-standard) 220ms backwards;
+}
+
+.desktop-shell[data-entrance] .now-note {
+  animation: desktop-rise 400ms var(--ease-standard) 280ms backwards;
+}
+
+.desktop-shell[data-entrance] .dock {
+  animation: dock-rise 440ms var(--ease-standard) 340ms backwards;
+}
+
 /* Press feedback — touch parity for hover-only affordances */
 
 .dock-item,
@@ -2200,6 +2253,15 @@ a[href] {
   .system-control {
     transform: none !important;
     will-change: auto;
+  }
+
+  .desktop-shell[data-entrance] .menu-bar,
+  .desktop-shell[data-entrance] .desktop-monogram,
+  .desktop-shell[data-entrance] .about-window,
+  .desktop-shell[data-entrance] .blog-window,
+  .desktop-shell[data-entrance] .now-note,
+  .desktop-shell[data-entrance] .dock {
+    animation: entrance-fade var(--motion-reduced) ease backwards;
   }
 }
 

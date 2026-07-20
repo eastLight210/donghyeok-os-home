@@ -3,7 +3,7 @@ import { publicApps, type PublicAppId } from "@/src/content/public-apps";
 export type ExperienceState =
   | { name: "boot" }
   | { name: "entering" }
-  | { name: "desktop"; activeApp: PublicAppId | null }
+  | { name: "desktop"; activeApp: PublicAppId | null; entrance?: boolean }
   | {
       name: "switcher";
       selectedApp: PublicAppId;
@@ -41,6 +41,11 @@ export function experienceReducer(
     case "ENTER":
       return state.name === "boot" ? { name: "entering" } : state;
     case "ENTERED":
+      return {
+        name: "desktop",
+        activeApp: event.activeApp ?? null,
+        entrance: true,
+      };
     case "SKIP_BOOT":
       return { name: "desktop", activeApp: event.activeApp ?? null };
     case "OPEN_SWITCHER":

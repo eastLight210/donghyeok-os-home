@@ -1293,7 +1293,12 @@ export default function DonghyeokOS() {
       </AnimatePresence>
 
       {state.name !== "boot" && state.name !== "entering" ? (
-        <main className="desktop-shell">
+        <main
+          className="desktop-shell"
+          data-entrance={
+            (state.name === "desktop" && state.entrance) || undefined
+          }
+        >
           <MenuBar activeLabel={activeLabel} />
           <div
             className="desktop-surface"

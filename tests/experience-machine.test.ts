@@ -19,6 +19,7 @@ describe("DonghyeokOS experience machine", () => {
     expect(experienceReducer(entering, { type: "ENTERED" })).toEqual({
       name: "desktop",
       activeApp: null,
+      entrance: true,
     });
   });
 
