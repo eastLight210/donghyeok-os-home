@@ -489,6 +489,7 @@ function WebGLReelComponent(
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || typeof window.WebGL2RenderingContext === "undefined") {
+      console.warn("[reel] WebGL2 unsupported, using DOM fallback");
       onUnavailable();
       return;
     }
@@ -500,6 +501,7 @@ function WebGLReelComponent(
       premultipliedAlpha: true,
     });
     if (!context) {
+      console.warn("[reel] WebGL2 context unavailable, using DOM fallback");
       onUnavailable();
       return;
     }
@@ -1078,7 +1080,8 @@ function WebGLReelComponent(
         renderer.render(scene, camera);
         onReady();
         animationFrame = window.requestAnimationFrame(render);
-      } catch {
+      } catch (error) {
+        console.error("[reel] WebGL init failed, using DOM fallback:", error);
         if (!disposed) onUnavailable();
       }
     };
