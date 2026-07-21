@@ -916,11 +916,17 @@ a[href] {
 }
 
 /* Focus returned programmatically after a pointer-driven switcher dismissal:
-   keep the focus for keyboard continuity, hide its visual treatment. */
-.system-control[data-silent-focus]:focus-visible:not(:hover) {
+   keep the focus for keyboard continuity, hide its visual treatment. The
+   pointer often still rests on the launcher, so hover may only restore the
+   accent color — never the focus ring. */
+.system-control[data-silent-focus]:focus-visible {
   outline: none;
   box-shadow: none;
   color: var(--color-text-muted);
+}
+
+.system-control[data-silent-focus]:focus-visible:hover {
+  color: var(--color-accent-orange);
 }
 
 .launcher-control > span {
