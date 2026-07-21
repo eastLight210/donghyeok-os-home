@@ -405,7 +405,7 @@ function DesktopHome({
   receded,
 }: {
   onOpenApp: (id: PublicAppId, origin?: LaunchOrigin) => void;
-  onOpenSwitcher: () => void;
+  onOpenSwitcher: (viaPointer: boolean) => void;
   onPower: () => void;
   launcherRef: RefObject<HTMLButtonElement | null>;
   receded: boolean;
@@ -1256,6 +1256,7 @@ export default function DonghyeokOS() {
   const [launchOrigin, setLaunchOrigin] = useState<LaunchOrigin | null>(null);
   const [entryOrigin, setEntryOrigin] = useState<EntryOrigin | null>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
+  const switcherOpenedByPointer = useRef(false);
   const switcherRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
   const isSwitcher = state.name === "switcher";
@@ -1302,6 +1303,33 @@ export default function DonghyeokOS() {
   const openSelected = useCallback(() => {
     setLaunchOrigin(null);
     dispatch({ type: "OPEN_SELECTED" });
+  }, []);
+
+  const openSwitcher = useCallback((viaPointer: boolean) => {
+    switcherOpenedByPointer.current = viaPointer;
+    dispatch({ type: "OPEN_SWITCHER" });
+  }, []);
+
+  // Focus must return to the launcher on close (a11y contract), but a pointer
+  // user who dismisses the switcher shouldn't be left with a lingering
+  // keyboard-focus treatment on the Dock.
+  const closeSwitcher = useCallback(() => {
+    dispatch({ type: "CANCEL_SWITCHER" });
+    window.setTimeout(() => {
+      const launcher = launcherRef.current;
+      if (!launcher) return;
+      if (switcherOpenedByPointer.current) {
+        launcher.dataset.silentFocus = "true";
+        launcher.addEventListener(
+          "blur",
+          () => {
+            delete launcher.dataset.silentFocus;
+          },
+          { once: true },
+        );
+      }
+      launcher.focus();
+    }, 0);
   }, []);
 
   useEffect(() => {
@@ -1388,8 +1416,7 @@ export default function DonghyeokOS() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        dispatch({ type: "CANCEL_SWITCHER" });
-        window.setTimeout(() => launcherRef.current?.focus(), 0);
+        closeSwitcher();
       } else if (
         event.key === "Enter" &&
         document.activeElement?.getAttribute("role") === "option"
@@ -1417,7 +1444,7 @@ export default function DonghyeokOS() {
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isSwitcher, selectedSwitcherApp, openSelected]);
+  }, [isSwitcher, selectedSwitcherApp, openSelected, closeSwitcher]);
 
   useEffect(() => {
     if (!activeApp) return;
@@ -1485,7 +1512,7 @@ export default function DonghyeokOS() {
           >
             <DesktopHome
               onOpenApp={openApp}
-              onOpenSwitcher={() => dispatch({ type: "OPEN_SWITCHER" })}
+              onOpenSwitcher={openSwitcher}
               onPower={powerOff}
               launcherRef={launcherRef}
               receded={isSwitcher}
@@ -1505,10 +1532,7 @@ export default function DonghyeokOS() {
                 onSelect={(appId) => dispatch({ type: "SELECT_APP", appId })}
                 onRotate={(direction) => dispatch({ type: "ROTATE", direction })}
                 onOpen={openSelected}
-                onClose={() => {
-                  dispatch({ type: "CANCEL_SWITCHER" });
-                  window.setTimeout(() => launcherRef.current?.focus(), 0);
-                }}
+                onClose={closeSwitcher}
                 dialogRef={switcherRef}
               />
             ) : null}

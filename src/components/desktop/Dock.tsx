@@ -29,7 +29,7 @@ export function Dock({
   launcherRef,
 }: {
   onOpenApp: (id: PublicAppId, origin: LaunchOrigin) => void;
-  onOpenSwitcher: () => void;
+  onOpenSwitcher: (viaPointer: boolean) => void;
   onPower: () => void;
   launcherRef: RefObject<HTMLButtonElement | null>;
 }) {
@@ -39,7 +39,7 @@ export function Dock({
 
   const resetOrRestoreKeyboardFocus = useCallback(() => {
     const focusedItem = findDockItem(document.activeElement);
-    if (focusedItem?.matches(":focus-visible")) {
+    if (focusedItem?.matches(":focus-visible") && !focusedItem.dataset.silentFocus) {
       pointerX.set(itemCenterX(focusedItem));
     } else {
       pointerX.set(Number.POSITIVE_INFINITY);
@@ -68,7 +68,9 @@ export function Dock({
     (event: FocusEvent<HTMLElement>) => {
       if (reducedMotion || pointerIsInside.current) return;
       const focusedItem = findDockItem(event.target);
-      if (focusedItem) pointerX.set(itemCenterX(focusedItem));
+      if (focusedItem && !focusedItem.dataset.silentFocus) {
+        pointerX.set(itemCenterX(focusedItem));
+      }
     },
     [pointerX, reducedMotion],
   );
@@ -110,7 +112,7 @@ export function Dock({
       <div className="dock-system">
         <DockSystemControl
           className="launcher-control"
-          onClick={onOpenSwitcher}
+          onClick={(event) => onOpenSwitcher(event.detail > 0)}
           ref={launcherRef}
           aria-label="Open App Switcher"
           pointerX={pointerX}

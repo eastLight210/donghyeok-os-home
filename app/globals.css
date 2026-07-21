@@ -910,6 +910,14 @@ a[href] {
   color: var(--color-accent-orange);
 }
 
+/* Focus returned programmatically after a pointer-driven switcher dismissal:
+   keep the focus for keyboard continuity, hide its visual treatment. */
+.system-control[data-silent-focus]:focus-visible:not(:hover) {
+  outline: none;
+  box-shadow: none;
+  color: var(--color-text-muted);
+}
+
 .launcher-control > span {
   display: grid;
   grid-template-columns: repeat(3, 7px);

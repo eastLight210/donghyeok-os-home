@@ -165,6 +165,55 @@ describe("DonghyeokOS UI contract", () => {
     expect(document.body.dataset.scrollLocked).toBeUndefined();
   });
 
+  it("mutes the launcher focus treatment when a pointer-opened switcher closes", async () => {
+    await act(async () => root.render(<DonghyeokOS />));
+    await act(async () => {
+      document
+        .querySelector<HTMLButtonElement>(
+          '[aria-label="Enter DonghyeokOS as Donghyeok"]',
+        )
+        ?.click();
+      await vi.advanceTimersByTimeAsync(220);
+    });
+
+    const launcher = document.querySelector<HTMLButtonElement>(
+      '[aria-label="Open App Switcher"]',
+    );
+    expect(launcher).not.toBeNull();
+
+    // Real pointer clicks carry detail > 0; keyboard activation reports 0.
+    await act(async () => {
+      launcher?.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1 }),
+      );
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      await vi.advanceTimersByTimeAsync(400);
+    });
+    expect(document.activeElement).toBe(launcher);
+    expect(launcher?.dataset.silentFocus).toBe("true");
+
+    await act(async () => launcher?.blur());
+    expect(launcher?.dataset.silentFocus).toBeUndefined();
+
+    await act(async () => {
+      launcher?.click();
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      await vi.advanceTimersByTimeAsync(400);
+    });
+    expect(document.activeElement).toBe(launcher);
+    expect(launcher?.dataset.silentFocus).toBeUndefined();
+  });
+
   it("uses touch-first helper copy on coarse pointers", async () => {
     coarsePointer = true;
     await act(async () => root.render(<DonghyeokOS />));
