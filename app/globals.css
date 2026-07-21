@@ -537,6 +537,10 @@ a[href] {
   border-radius: 50%;
   filter: blur(50px);
   opacity: 0.18;
+
+  /* Own compositing layer: Safari mis-repaints large blurs when an
+     overlapping sibling (.now-note hover) promotes and demotes. */
+  transform: translateZ(0);
 }
 
 .ambient-orange {
@@ -775,6 +779,7 @@ a[href] {
   transition:
     transform var(--motion-reduced) ease,
     box-shadow var(--motion-reduced) ease;
+  will-change: transform;
 }
 
 .now-note:hover {
