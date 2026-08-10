@@ -85,6 +85,10 @@ describe("public app contract", () => {
       href: "https://github.com/eastLight210/SSD_Remover",
       status: "LIVE",
     });
+    expect(projects.find((project) => project.title === "TrackPinch")).toMatchObject({
+      href: "https://github.com/eastLight210/TrackPinch",
+      status: "ALPHA",
+    });
     expect(JSON.stringify(nowItems)).toContain("SHIFT UP");
     expect(JSON.stringify(nowItems)).toContain("NIKKE Engine Team");
     expect(JSON.stringify(nowItems)).toContain("Aug 31, 2026");

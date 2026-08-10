@@ -40,6 +40,14 @@ export const projects = [
     technologies: ["Swift", "SwiftUI", "Swift Concurrency", "CLI"],
     href: "https://github.com/eastLight210/SSD_Remover",
   },
+  {
+    title: "TrackPinch",
+    status: "ALPHA",
+    summary:
+      "A macOS menu bar utility for resizing the active window with a modifier key and a two-finger trackpad gesture.",
+    technologies: ["Swift", "SwiftUI", "AppKit", "Accessibility"],
+    href: "https://github.com/eastLight210/TrackPinch",
+  },
 ] as const;
 
 export const nowItems = [
