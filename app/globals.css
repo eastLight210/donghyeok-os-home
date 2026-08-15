@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+KR:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap");
 @import "../src/styles/tokens.css";
 
 * {
@@ -6,9 +6,9 @@
 }
 
 html {
-  background: var(--color-bg-canvas);
+  background: var(--color-bg-desktop-fallback);
   color: var(--color-text-primary);
-  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-ui);
 }
 
 body {
@@ -61,7 +61,7 @@ a[href] {
 .experience-root {
   position: relative;
   overflow: hidden;
-  background: var(--color-bg-canvas);
+  background: var(--color-bg-desk);
 }
 
 /* Boot */
@@ -455,11 +455,28 @@ a[href] {
 .desktop-shell {
   position: relative;
   overflow: hidden;
-  background: var(--color-bg-canvas);
+  background: var(--color-bg-desktop-fallback);
+}
+
+.desktop-wallpaper {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-desktop-bg);
+  background:
+    url("/images/desktop/wallpaper.svg") center / cover no-repeat,
+    var(--color-bg-desktop-fallback);
+}
+
+.desktop-wallpaper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, transparent 46%, rgb(18 28 42 / 18%) 100%);
 }
 
 .desktop-surface {
   position: relative;
+  z-index: var(--z-window);
   min-height: 100dvh;
   padding-top: calc(var(--menu-bar-height) + var(--safe-area-top));
 }
@@ -469,7 +486,7 @@ a[href] {
   min-height: calc(100dvh - var(--menu-bar-height) - var(--safe-area-top));
   overflow: hidden;
   transform-origin: 50% 58%;
-  background: var(--color-bg-canvas);
+  background: transparent;
 }
 
 .menu-bar {
@@ -480,12 +497,13 @@ a[href] {
   height: calc(var(--menu-bar-height) + var(--safe-area-top));
   align-items: center;
   justify-content: space-between;
-  padding: var(--safe-area-top) var(--space-6) 0;
-  border-bottom: 1px solid var(--color-border-glass);
-  background: rgb(255 255 255 / 52%);
-  box-shadow: 0 6px 16px rgb(43 36 31 / 5%);
-  backdrop-filter: blur(18px);
+  padding: var(--safe-area-top) 14px 0;
+  border-bottom: 1px solid rgb(255 255 255 / 22%);
+  background: rgb(255 255 255 / 28%);
+  box-shadow: none;
+  backdrop-filter: blur(24px) saturate(1.7);
   font-size: 13px;
+  font-weight: 500;
 }
 
 .menu-left,
@@ -500,16 +518,30 @@ a[href] {
 
 .menu-left strong {
   font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.menu-app {
+  color: var(--color-text-secondary);
+  font-weight: 400;
 }
 
 .menu-mark {
-  color: var(--color-accent-orange);
-  font-size: 22px;
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  border-radius: 5px;
+  background: var(--color-accent-ink);
+  color: var(--color-bg-canvas-soft);
+  font-family: var(--font-display);
+  font-size: 12px;
+  line-height: 1;
 }
 
 .menu-divider {
   width: 1px;
-  height: 18px;
+  height: 12px;
   background: var(--color-border-subtle);
 }
 
@@ -521,59 +553,6 @@ a[href] {
   font-variant-numeric: tabular-nums;
 }
 
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--color-text-muted);
-}
-
-.ambient {
-  position: absolute;
-  z-index: var(--z-desktop-bg);
-  width: 38vw;
-  max-width: 620px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  filter: blur(50px);
-  opacity: 0.18;
-
-  /* Own compositing layer: Safari mis-repaints large blurs when an
-     overlapping sibling (.now-note hover) promotes and demotes. */
-  transform: translateZ(0);
-}
-
-.ambient-orange {
-  top: 40%;
-  left: -4%;
-  background: var(--color-accent-orange-soft);
-}
-
-.ambient-blue {
-  right: -6%;
-  bottom: -12%;
-  background: var(--color-accent-blue);
-}
-
-.ambient-green {
-  bottom: -14%;
-  left: 40%;
-  background: var(--color-accent-green);
-}
-
-.desktop-monogram {
-  position: absolute;
-  top: 22%;
-  left: 27%;
-  z-index: var(--z-desktop-bg);
-  color: var(--color-accent-orange);
-  font-family: "DM Serif Display", Georgia, serif;
-  font-size: clamp(220px, 25vw, 420px);
-  line-height: 0.8;
-  opacity: 0.93;
-  user-select: none;
-}
-
 .os-window {
   position: absolute;
   z-index: var(--z-window);
@@ -582,9 +561,9 @@ a[href] {
   border-radius: var(--radius-window);
   background: var(--color-surface-window);
   box-shadow:
-    0 20px 40px -12px rgb(43 36 31 / 12%),
-    inset 0 1px 1px rgb(255 255 255 / 78%);
-  backdrop-filter: blur(24px);
+    0 22px 50px -18px rgb(var(--color-shadow) / 34%),
+    inset 0 1px 0 rgb(255 255 255 / 82%);
+  backdrop-filter: blur(28px) saturate(1.55);
 }
 
 .about-window {
@@ -604,57 +583,48 @@ a[href] {
 }
 
 .window-header {
+  position: relative;
   display: flex;
-  height: 52px;
+  height: var(--window-header-height);
   align-items: center;
-  gap: var(--space-4);
-  padding: 0 var(--space-4);
+  justify-content: center;
+  padding: 0 52px;
   background: var(--color-surface-window-soft);
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .traffic-lights {
+  position: absolute;
+  left: 10px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-}
-
-.traffic-lights > span {
-  display: block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--color-window-close);
-}
-
-.traffic-lights > span:nth-child(2) {
-  background: #f3cf76;
-}
-
-.traffic-lights > span:nth-child(3) {
-  background: var(--color-accent-green);
+  gap: 7px;
 }
 
 .traffic-light-button {
   position: relative;
-  width: 20px;
-  height: 20px;
-  margin-inline: -4px;
+  width: 16px;
+  height: 16px;
   padding: 0;
-  cursor: pointer;
+  cursor: default;
   border: 0;
   border-radius: 50%;
   background: transparent;
 }
 
+button.traffic-light-button {
+  cursor: pointer;
+}
+
 .traffic-light-button::before {
   content: "";
   position: absolute;
-  inset: 4px;
+  inset: 2px;
   border-radius: 50%;
   background: var(--traffic-light-color);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 36%);
 }
 
 .traffic-light-button::after {
@@ -663,7 +633,7 @@ a[href] {
   display: grid;
   place-items: center;
   color: var(--traffic-light-symbol);
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 700;
   line-height: 1;
   opacity: 0;
@@ -672,16 +642,25 @@ a[href] {
 
 .traffic-light-close {
   --traffic-light-color: var(--color-window-close);
-  --traffic-light-symbol: rgb(86 20 16 / 72%);
+  --traffic-light-symbol: rgb(86 20 16 / 78%);
 }
 
 .traffic-light-close::after {
   content: "×";
 }
 
+.traffic-light-minimize {
+  --traffic-light-color: var(--color-window-minimize);
+  --traffic-light-symbol: rgb(92 58 8 / 78%);
+}
+
+.traffic-light-minimize::after {
+  content: "−";
+}
+
 .traffic-light-maximize {
-  --traffic-light-color: var(--color-accent-green);
-  --traffic-light-symbol: rgb(20 70 30 / 78%);
+  --traffic-light-color: var(--color-window-maximize);
+  --traffic-light-symbol: rgb(16 68 24 / 78%);
 }
 
 .traffic-light-maximize::after {
@@ -692,6 +671,7 @@ a[href] {
   content: "−";
 }
 
+.traffic-lights:hover .traffic-light-button::after,
 .traffic-light-button:hover::after,
 .traffic-light-button:focus-visible::after {
   opacity: 1;
@@ -703,7 +683,8 @@ a[href] {
 }
 
 .window-content {
-  padding: var(--space-10);
+  padding: var(--space-6) var(--space-8);
+  background: var(--color-surface-window-content);
 }
 
 .about-window .window-content {
@@ -715,8 +696,8 @@ a[href] {
 
 .about-window p {
   margin: 0;
-  font-size: clamp(14px, 1.08vw, 16px);
-  line-height: 1.8;
+  font-size: 15px;
+  line-height: 1.65;
 }
 
 .recent-posts {
@@ -768,13 +749,16 @@ a[href] {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 10px;
-  padding: 28px;
+  gap: 8px;
+  padding: 22px 24px;
   cursor: pointer;
-  transform: rotate(-2deg);
-  border-radius: 8px;
+  border: 1px solid var(--color-border-glass);
+  border-radius: var(--radius-widget);
   background: var(--color-surface-sticky);
-  box-shadow: 0 16px 28px -10px rgb(43 36 31 / 12%);
+  box-shadow:
+    0 18px 36px -16px rgb(var(--color-shadow) / 32%),
+    inset 0 1px 0 rgb(255 255 255 / 70%);
+  backdrop-filter: blur(22px) saturate(1.45);
   text-align: left;
   transition:
     transform var(--motion-reduced) ease,
@@ -783,15 +767,15 @@ a[href] {
 }
 
 .now-note:hover {
-  transform: rotate(-1deg) translateY(-4px);
-  box-shadow: 0 22px 38px -12px rgb(43 36 31 / 18%);
+  transform: translateY(-3px);
+  box-shadow: 0 24px 44px -16px rgb(var(--color-shadow) / 40%);
 }
 
 .now-note > span {
-  margin-bottom: var(--space-2);
-  color: var(--color-text-muted);
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .now-note small {
@@ -802,54 +786,53 @@ a[href] {
 
 .dock {
   position: absolute;
-  bottom: clamp(28px, 3.4vh, 44px);
+  bottom: clamp(16px, 2.4vh, 28px);
   left: 50%;
   z-index: var(--z-dock);
   display: flex;
   align-items: flex-end;
-  gap: var(--space-5);
-  padding: 14px 20px;
+  gap: 8px;
+  padding: 6px 10px 8px;
   overflow: visible;
   translate: -50% 0;
   isolation: isolate;
-  border: 1px solid var(--color-border-glass);
+  border: 1px solid rgb(255 255 255 / 38%);
   border-radius: var(--radius-dock);
-  background: var(--color-surface-window-soft);
+  background: var(--color-surface-glass);
   box-shadow:
-    0 16px 32px -10px rgb(43 36 31 / 16%),
-    inset 0 1px 2px rgb(255 255 255 / 82%);
-  backdrop-filter: blur(28px);
+    0 16px 40px -12px rgb(var(--color-shadow) / 38%),
+    inset 0 1px 0 rgb(255 255 255 / 55%);
+  backdrop-filter: blur(32px) saturate(1.8);
 }
 
 .dock-apps,
 .dock-system {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-5);
+  gap: 8px;
 }
 
 .dock-item {
   position: relative;
   display: grid;
-  width: 66px;
-  height: 66px;
+  width: var(--dock-icon-size);
+  height: var(--dock-icon-size);
   place-items: center;
   cursor: pointer;
   background: transparent;
 }
 
+.dock-item-icon,
+.dock-icon-svg {
+  display: block;
+  width: var(--dock-icon-size);
+  height: var(--dock-icon-size);
+}
+
 .dock-item-icon {
-  display: grid;
-  width: 66px;
-  height: 66px;
-  place-items: center;
-  border-radius: 17px;
-  background: var(--tone);
-  box-shadow: 0 7px 14px -5px rgb(43 36 31 / 18%);
-  color: var(--color-text-inverse);
-  font-family: "DM Serif Display", Georgia, serif;
-  font-size: 28px;
-  line-height: 1;
+  overflow: hidden;
+  border-radius: var(--radius-icon);
+  box-shadow: 0 8px 16px -8px rgb(var(--color-shadow) / 42%);
   transform-origin: bottom center;
   will-change: transform;
 }
@@ -864,12 +847,12 @@ a[href] {
   transform: translate(50%, 4px);
   border: 1px solid var(--color-border-glass);
   border-radius: var(--radius-pill);
-  background: rgb(255 251 243 / 88%);
-  box-shadow: 0 8px 20px -8px rgb(43 36 31 / 24%);
+  background: rgb(255 255 255 / 86%);
+  box-shadow: 0 8px 20px -8px rgb(var(--color-shadow) / 28%);
   backdrop-filter: blur(14px);
   opacity: 0;
   color: var(--color-text-primary);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1;
   white-space: nowrap;
   transition:
@@ -890,24 +873,36 @@ a[href] {
 
 .dock-divider {
   width: 1px;
-  height: 56px;
+  height: 36px;
   align-self: center;
-  background: var(--color-border-subtle);
+  background: rgb(29 36 44 / 18%);
 }
 
 .system-control {
   display: grid;
-  width: 66px;
-  height: 66px;
+  width: var(--dock-icon-size);
+  height: var(--dock-icon-size);
   place-items: center;
   cursor: pointer;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 17px;
-  background: var(--color-bg-canvas-soft);
+  border: 0;
+  border-radius: var(--radius-icon);
+  background: transparent;
   color: var(--color-text-muted);
   transform-origin: bottom center;
-  transition: color var(--motion-reduced) ease;
   will-change: transform;
+}
+
+.system-control-face,
+.system-control-face .dock-icon-svg {
+  display: block;
+  width: var(--dock-icon-size);
+  height: var(--dock-icon-size);
+}
+
+.system-control-face {
+  overflow: hidden;
+  border-radius: var(--radius-icon);
+  box-shadow: 0 8px 16px -8px rgb(var(--color-shadow) / 42%);
 }
 
 .system-control:hover,
@@ -929,35 +924,22 @@ a[href] {
   color: var(--color-accent-orange);
 }
 
-.launcher-control > span {
-  display: grid;
-  grid-template-columns: repeat(3, 7px);
-  gap: 3px;
-}
-
 .launcher-control i {
-  width: 7px;
-  height: 7px;
-  border-radius: 2px;
-  background: currentColor;
-}
-
-.power-control {
-  font-size: 24px;
+  display: none;
 }
 
 /* Local app windows */
 
 .app-window {
   position: fixed;
-  inset: clamp(96px, 11vh, 124px) max(5vw, calc((100vw - 1280px) / 2)) clamp(156px, 16vh, 184px);
+  inset: clamp(72px, 9vh, 104px) max(5vw, calc((100vw - 1280px) / 2)) clamp(132px, 14vh, 168px);
   z-index: var(--z-window);
   overflow: hidden;
   border: 1px solid var(--color-border-glass);
   border-radius: var(--radius-window);
-  background: rgb(255 255 255 / 88%);
-  box-shadow: 0 28px 70px -22px rgb(43 36 31 / 28%);
-  backdrop-filter: blur(24px);
+  background: rgb(255 255 255 / 86%);
+  box-shadow: 0 28px 70px -22px rgb(var(--color-shadow) / 36%);
+  backdrop-filter: blur(28px) saturate(1.5);
   transition:
     inset var(--motion-window) var(--ease-standard),
     border-radius var(--motion-window) var(--ease-standard),
@@ -974,27 +956,37 @@ a[href] {
 }
 
 .app-window-header {
+  position: relative;
   display: flex;
-  height: 52px;
+  height: var(--window-header-height);
   align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--space-4);
+  justify-content: center;
+  padding: 0 88px;
   border-bottom: 1px solid var(--color-border-subtle);
   background: var(--color-surface-window-soft);
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
-.app-window-header > div {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
+.app-window-header .traffic-lights {
+  position: absolute;
+  left: 10px;
+}
+
+.app-window-header > span:not(.app-window-shortcut) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-window-shortcut {
+  position: absolute;
+  right: 12px;
   color: var(--color-text-muted);
-  font-size: 9px;
-  letter-spacing: 0.16em;
+  font-size: 11px;
+  letter-spacing: 0.04em;
 }
 
 .app-window-body {
@@ -1011,11 +1003,12 @@ a[href] {
 }
 
 .app-window-body > h1 {
-  margin: 0 0 var(--space-8);
-  font-family: "DM Serif Display", Georgia, serif;
-  font-size: clamp(48px, 7vw, 90px);
-  font-weight: 400;
-  line-height: 0.95;
+  margin: 0 0 var(--space-6);
+  font-family: var(--font-ui);
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
 .blog-app-content {
@@ -1251,17 +1244,18 @@ a[href] {
   position: absolute;
   inset: 0;
   z-index: var(--z-switcher-veil);
-  background: rgb(255 251 243 / 80%);
-  backdrop-filter: blur(18px);
+  background: rgb(18 28 42 / 18%);
+  backdrop-filter: blur(22px) saturate(1.35);
 }
 
 .switcher-helper {
   position: relative;
   z-index: var(--z-switcher-reel);
   margin: clamp(44px, 6vh, 76px) 0 0;
-  color: var(--color-text-secondary);
-  font-size: 10px;
-  letter-spacing: 0.24em;
+  color: var(--color-text-inverse);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-shadow: 0 1px 8px rgb(18 28 42 / 35%);
 }
 
 .reel-stage {
@@ -1622,21 +1616,21 @@ a[href] {
 .selected-glyph {
   position: relative;
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid rgb(255 255 255 / 24%);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 34% 28%, rgb(255 255 255 / 32%), transparent 32%),
-    var(--reel-tone, var(--tone));
-  box-shadow:
-    inset 0 1px 1px rgb(255 255 255 / 42%),
-    0 4px 12px rgb(23 18 29 / 18%);
-  color: var(--color-text-inverse);
-  font-family: "DM Serif Display", Georgia, serif;
-  font-size: 21px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  box-shadow: 0 4px 12px rgb(23 18 29 / 18%);
+}
+
+.selected-glyph > span,
+.selected-glyph .dock-icon-svg {
+  display: block;
+  width: 44px;
+  height: 44px;
 }
 
 .selected-meta {
@@ -1745,22 +1739,22 @@ a[href] {
   backdrop-filter: blur(24px);
 }
 
-.opening-app > span {
-  display: grid;
-  width: 58px;
-  height: 58px;
-  place-items: center;
-  border-radius: 16px;
-  background: var(--tone);
-  color: var(--color-text-inverse);
-  font-family: "DM Serif Display", Georgia, serif;
-  font-size: 24px;
+.opening-app-icon,
+.opening-app-icon .dock-icon-svg {
+  display: block;
+  width: 52px;
+  height: 52px;
+}
+
+.opening-app-icon {
+  overflow: hidden;
+  border-radius: var(--radius-icon);
 }
 
 .opening-app strong {
-  font-family: "DM Serif Display", Georgia, serif;
-  font-size: 25px;
-  font-weight: 400;
+  font-family: var(--font-ui);
+  font-size: 22px;
+  font-weight: 600;
 }
 
 /* Tablet */
@@ -1791,20 +1785,13 @@ a[href] {
     width: 260px;
   }
 
-  .dock-item {
-    width: 60px;
-    height: 60px;
-  }
-
-  .dock-item-icon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .system-control {
-    width: 60px;
-    height: 60px;
-    border-radius: 16px;
+  .dock-item,
+  .dock-item-icon,
+  .system-control,
+  .system-control-face,
+  .system-control-face .dock-icon-svg {
+    width: 48px;
+    height: 48px;
   }
 
   .reel-stage {
@@ -1816,7 +1803,7 @@ a[href] {
 
 @media (max-width: 767px) {
   :root {
-    --menu-bar-height: 52px;
+    --menu-bar-height: 32px;
   }
 
   body {
@@ -1888,9 +1875,8 @@ a[href] {
     white-space: nowrap;
   }
 
-  .menu-right > span:first-child,
-  .status-dot {
-    display: none;
+  .menu-right time {
+    font-size: 12px;
   }
 
   .desktop-surface {
@@ -1912,17 +1898,6 @@ a[href] {
     user-select: none;
   }
 
-  .desktop-monogram {
-    top: 32%;
-    left: 7%;
-    font-size: 58vw;
-    opacity: 0.22;
-  }
-
-  .ambient {
-    width: 80vw;
-  }
-
   .os-window {
     position: relative;
     top: auto;
@@ -1932,7 +1907,7 @@ a[href] {
     height: auto;
     min-height: 0;
     flex: none;
-    border-radius: 22px;
+    border-radius: 14px;
   }
 
   .about-window {
@@ -2001,16 +1976,14 @@ a[href] {
     gap: 7px;
   }
 
-  .dock-item {
+  .dock-item,
+  .dock-item-icon,
+  .dock-item-icon .dock-icon-svg,
+  .system-control,
+  .system-control-face,
+  .system-control-face .dock-icon-svg {
     width: 48px;
     height: 48px;
-  }
-
-  .dock-item-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 13px;
-    font-size: 21px;
   }
 
   .dock-item small {
@@ -2018,24 +1991,7 @@ a[href] {
   }
 
   .dock-divider {
-    height: 40px;
-  }
-
-  .system-control {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-  }
-
-  .launcher-control > span {
-    grid-template-columns: repeat(3, 5px);
-    gap: 2.5px;
-  }
-
-  .launcher-control i {
-    width: 5px;
-    height: 5px;
-    border-radius: 1.5px;
+    height: 32px;
   }
 
   .app-window,
@@ -2049,14 +2005,11 @@ a[href] {
   }
 
   .app-window-header {
-    padding-inline: var(--space-5);
+    justify-content: flex-start;
+    padding-inline: 42px 12px;
   }
 
   .app-window .traffic-light-maximize {
-    display: none;
-  }
-
-  .app-window-header > div > span:last-child {
     display: none;
   }
 
@@ -2173,13 +2126,12 @@ a[href] {
     gap: 4px;
   }
 
-  .dock-item {
-    width: 43px;
-    height: 43px;
-  }
-
+  .dock-item,
   .dock-item-icon,
-  .system-control {
+  .dock-item-icon .dock-icon-svg,
+  .system-control,
+  .system-control-face,
+  .system-control-face .dock-icon-svg {
     width: 43px;
     height: 43px;
   }
@@ -2222,7 +2174,7 @@ a[href] {
   animation: desktop-drop 320ms var(--ease-standard) 100ms backwards;
 }
 
-.desktop-shell[data-entrance] .desktop-monogram {
+.desktop-shell[data-entrance] .desktop-wallpaper {
   animation: entrance-fade 500ms ease 100ms backwards;
 }
 
@@ -2336,7 +2288,7 @@ a:focus-visible .link-arrow {
 }
 
 .now-note:active {
-  transform: rotate(-1.4deg) translateY(-1px);
+  transform: translateY(-1px);
 }
 
 .monitor:active {
@@ -2394,7 +2346,7 @@ a:focus-visible .link-arrow {
   }
 
   .desktop-shell[data-entrance] .menu-bar,
-  .desktop-shell[data-entrance] .desktop-monogram,
+  .desktop-shell[data-entrance] .desktop-wallpaper,
   .desktop-shell[data-entrance] .about-window,
   .desktop-shell[data-entrance] .blog-window,
   .desktop-shell[data-entrance] .now-note,
@@ -2421,6 +2373,6 @@ a:focus-visible .link-arrow {
   .app-window,
   .switcher-controls,
   .opening-app {
-    background: rgb(255 251 243 / 96%);
+    background: rgb(255 255 255 / 94%);
   }
 }

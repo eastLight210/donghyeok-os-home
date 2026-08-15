@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true">
+  <title>Original DonghyeokOS desktop landscape</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6f8eb3"/>
+      <stop offset="38%" stop-color="#9bb4c8"/>
+      <stop offset="58%" stop-color="#e4d2bc"/>
+      <stop offset="72%" stop-color="#c8b49a"/>
+      <stop offset="100%" stop-color="#7f8b6e"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="72%" cy="28%" r="28%">
+      <stop offset="0%" stop-color="#fff4d8" stop-opacity=".95"/>
+      <stop offset="28%" stop-color="#f3c58a" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#f3c58a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="haze" cx="50%" cy="56%" r="48%">
+      <stop offset="0%" stop-color="#f7efe4" stop-opacity=".42"/>
+      <stop offset="100%" stop-color="#f7efe4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="far" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8ea3b8"/>
+      <stop offset="100%" stop-color="#6f8496"/>
+    </linearGradient>
+    <linearGradient id="mid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7d8c7a"/>
+      <stop offset="100%" stop-color="#5d6b58"/>
+    </linearGradient>
+    <linearGradient id="near" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5f6d52"/>
+      <stop offset="100%" stop-color="#3f4a36"/>
+    </linearGradient>
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+    <filter id="softer" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.045"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <rect width="1920" height="1080" fill="url(#sun)"/>
+  <ellipse cx="1380" cy="310" rx="90" ry="90" fill="#fff6df" opacity=".55" filter="url(#softer)"/>
+  <path d="M-40 620 C 180 540, 340 580, 520 560 C 760 534, 900 610, 1120 570 C 1320 536, 1480 590, 1960 540 L 1960 1080 L -40 1080 Z" fill="url(#far)" opacity=".72" filter="url(#soft)"/>
+  <path d="M-40 690 C 220 610, 430 660, 680 630 C 920 600, 1100 690, 1360 650 C 1580 618, 1760 680, 1960 640 L 1960 1080 L -40 1080 Z" fill="url(#mid)" opacity=".88" filter="url(#soft)"/>
+  <rect width="1920" height="1080" fill="url(#haze)"/>
+  <path d="M-40 820 C 260 740, 480 800, 760 770 C 1040 738, 1260 830, 1540 790 C 1720 766, 1840 820, 1960 800 L 1960 1080 L -40 1080 Z" fill="url(#near)"/>
+  <rect width="1920" height="1080" filter="url(#grain)"/>
+</svg>

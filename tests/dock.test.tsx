@@ -92,8 +92,8 @@ describe("Dock proximity magnification", () => {
 
     expect(center).toEqual<DockMagnification>({
       influence: 1,
-      scale: 1.22,
-      y: -7,
+      scale: 1.48,
+      y: -14,
     });
     expect(neighbor.scale).toBeGreaterThan(1);
     expect(neighbor.scale).toBeLessThan(center.scale);

@@ -21,6 +21,10 @@ Avoid these failure modes:
 - playful toy OS with too many bouncing elements
 - generic portfolio cards on a gradient background
 
+## 1.1 System UI chrome study
+
+The Home desktop now uses a system-UI chrome study: an original landscape wallpaper, thinner menu bar and window chrome, IBM Plex Sans for chrome, and illustrated squircle Dock icons. The boot desk stays cream. Do not use Apple fonts, symbols, wallpapers, or logos. Content surfaces may still use DM Serif Display (blog titles, reel faces). Live tokens live in `src/styles/tokens.css` and supersede the cream-canvas Figma values below when the two disagree.
+
 ## 2. Color tokens
 
 These values are read from the approved Figma screens. Use semantic CSS custom properties and keep primitive values behind them.
@@ -68,11 +72,12 @@ Color usage rules:
 
 | Role | Family | Typical use |
 | --- | --- | --- |
-| Editorial display | DM Serif Display | Monograms, large screen words, app titles, post titles |
-| System and body | IBM Plex Mono | Menu bar, controls, copy, metadata, keyboard hints |
-| Korean body fallback | IBM Plex Sans KR | Korean prose when mono is too dense |
+| System UI | IBM Plex Sans | Menu bar, window chrome, Dock labels, controls, body copy |
+| Editorial display | DM Serif Display | Reel titles, blog post titles, boot monogram |
+| Mono metadata | IBM Plex Mono | Optional code-like metadata only |
+| Korean body fallback | IBM Plex Sans KR | Korean prose |
 
-Do not default to Inter or SF Pro. The contrast between serif display type and mono system type is central to the identity.
+Do not use SF Pro. Inter is not the system UI face; IBM Plex Sans is the legal, in-family stand-in. Serif display type remains for editorial content, not chrome.
 
 ### Figma text styles
 
@@ -102,9 +107,10 @@ Web implementation guidance:
 
 ```css
 :root {
-  --radius-card: 20px;
-  --radius-window: 28px;
-  --radius-dock: 36px;
+  --radius-card: 14px;
+  --radius-window: 12px;
+  --radius-dock: 22px;
+  --radius-icon: 12px;
   --radius-pill: 9999px;
   --stroke-hairline: 1px;
 }
@@ -112,8 +118,8 @@ Web implementation guidance:
 
 Geometry rules:
 
-- Windows use 28 px corners and a clear 52 px title/header zone in the desktop reference.
-- Dock surfaces use 36 px corners.
+- Windows use 12 px corners and a 32 px title/header zone.
+- Dock surfaces use 22 px corners. Dock icons are 52 px squircles.
 - Dock Item icons are rounded squares, not circles.
 - The App Switcher reel is a perspective band with shallow top and bottom arcs. Do not substitute three rounded rectangles.
 - Circular controls are reserved for directional or system actions.
@@ -194,7 +200,7 @@ Implementation notes:
 
 Figma component: `9:2`
 
-- Reference height: 56 px
+- Reference height: 28 px
 - Left: orange mark, `DonghyeokOS`, divider, active app
 - Right: minimal status and time
 - The time may be live, but it should not cause hydration mismatch or constant layout movement.

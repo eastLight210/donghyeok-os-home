@@ -9,6 +9,7 @@ import {
   type RefObject,
 } from "react";
 import { publicApps, type PublicAppId } from "@/src/content/public-apps";
+import { DockIcon } from "./DockIcons";
 import { DockItem, DockSystemControl, type LaunchOrigin } from "./DockItem";
 
 function findDockItem(target: EventTarget | null) {
@@ -118,16 +119,8 @@ export function Dock({
           pointerX={pointerX}
           reducedMotion={reducedMotion}
         >
-          <span aria-hidden="true">
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
+          <span className="system-control-face" aria-hidden="true">
+            <DockIcon id="launcher" />
           </span>
         </DockSystemControl>
         <DockSystemControl
@@ -137,7 +130,9 @@ export function Dock({
           pointerX={pointerX}
           reducedMotion={reducedMotion}
         >
-          <span aria-hidden="true">⏻</span>
+          <span className="system-control-face" aria-hidden="true">
+            <DockIcon id="power" />
+          </span>
         </DockSystemControl>
       </div>
     </nav>

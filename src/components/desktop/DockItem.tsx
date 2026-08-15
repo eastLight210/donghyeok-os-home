@@ -16,9 +16,10 @@ import {
   type Ref,
 } from "react";
 import type { PublicApp } from "@/src/content/public-apps";
+import { DockIcon } from "./DockIcons";
 
-const DOCK_MAX_SCALE = 1.22;
-const DOCK_MAX_LIFT = 7;
+const DOCK_MAX_SCALE = 1.48;
+const DOCK_MAX_LIFT = 14;
 const DOCK_INFLUENCE_WIDTHS = 1.5;
 
 export const DOCK_MAGNIFICATION_SPRING = {
@@ -132,7 +133,7 @@ function DockItemContent({
   return (
     <>
       <motion.span className="dock-item-icon" aria-hidden="true" style={style}>
-        {app.glyph}
+        <DockIcon id={app.id} />
       </motion.span>
       <small>{app.label}</small>
     </>
