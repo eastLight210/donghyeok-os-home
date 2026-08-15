@@ -476,7 +476,6 @@ a[href] {
 
 .desktop-surface {
   position: relative;
-  z-index: var(--z-window);
   min-height: 100dvh;
   padding-top: calc(var(--menu-bar-height) + var(--safe-area-top));
 }
@@ -691,7 +690,7 @@ button.traffic-light-button {
   display: grid;
   gap: var(--space-8);
   align-content: center;
-  height: calc(100% - 52px);
+  height: calc(100% - var(--window-header-height));
 }
 
 .about-window p {
@@ -990,7 +989,7 @@ button.traffic-light-button {
 }
 
 .app-window-body {
-  height: calc(100% - 52px);
+  height: calc(100% - var(--window-header-height));
   overflow: auto;
   padding: clamp(28px, 4vw, 64px);
 }
@@ -1787,6 +1786,7 @@ button.traffic-light-button {
 
   .dock-item,
   .dock-item-icon,
+  .dock-item-icon .dock-icon-svg,
   .system-control,
   .system-control-face,
   .system-control-face .dock-icon-svg {
