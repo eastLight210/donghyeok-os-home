@@ -137,7 +137,7 @@ function useDockItemMagnification<T extends HTMLElement>(
   );
   const width = useTransform(springInfluence, (latestInfluence) => {
     const restingWidth = readDockRestingWidth(itemRef.current, faceRef.current);
-    if (restingWidth <= 0) return "var(--dock-icon-size)";
+    if (restingWidth <= 0) return "auto";
     return restingWidth * (1 + (DOCK_MAX_SCALE - 1) * latestInfluence);
   });
   const visualStyle: MotionStyle = reducedMotion
