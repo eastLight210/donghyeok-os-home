@@ -94,11 +94,13 @@ describe("Dock proximity magnification", () => {
       influence: 1,
       scale: 1.48,
       y: -14,
+      width: 66 * 1.48,
     });
     expect(neighbor.scale).toBeGreaterThan(1);
     expect(neighbor.scale).toBeLessThan(center.scale);
-    expect(far).toEqual({ influence: 0, scale: 1, y: 0 });
-    expect(reset).toEqual({ influence: 0, scale: 1, y: 0 });
+    expect(neighbor.width).toBe(66 * neighbor.scale);
+    expect(far).toEqual({ influence: 0, scale: 1, y: 0, width: 66 });
+    expect(reset).toEqual({ influence: 0, scale: 1, y: 0, width: 66 });
   });
 
   it("tracks pointer proximity and resets the shared motion value on leave", async () => {
@@ -148,6 +150,7 @@ describe("Dock proximity magnification", () => {
       influence: 0,
       scale: 1,
       y: 0,
+      width: 66,
     });
   });
 
@@ -175,5 +178,17 @@ describe("Dock proximity magnification", () => {
     expect(document.activeElement).toBe(outside);
     expect(motionMock.values[0]?.get()).toBe(Number.POSITIVE_INFINITY);
     expect(document.querySelector(".dock [data-active-dot]")).toBeNull();
+  });
+
+  it("reserves layout width equal to the scaled icon so neighbors are not covered", () => {
+    const restingWidth = 52;
+    const magnified = getDockMagnification(100, 100, restingWidth);
+    const neighbor = getDockMagnification(160, 100, restingWidth);
+
+    expect(magnified.width).toBe(restingWidth * magnified.scale);
+    expect(neighbor.width).toBe(restingWidth * neighbor.scale);
+    expect(magnified.width).toBeGreaterThan(restingWidth);
+    expect(neighbor.width).toBeGreaterThan(restingWidth);
+    expect(neighbor.width).toBeLessThan(magnified.width);
   });
 });
