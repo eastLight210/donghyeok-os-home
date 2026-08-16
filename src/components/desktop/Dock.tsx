@@ -119,9 +119,7 @@ export function Dock({
           pointerX={pointerX}
           reducedMotion={reducedMotion}
         >
-          <span className="system-control-face" aria-hidden="true">
-            <DockIcon id="launcher" />
-          </span>
+          <DockIcon id="launcher" />
         </DockSystemControl>
         <DockSystemControl
           className="power-control"
@@ -130,9 +128,7 @@ export function Dock({
           pointerX={pointerX}
           reducedMotion={reducedMotion}
         >
-          <span className="system-control-face" aria-hidden="true">
-            <DockIcon id="power" />
-          </span>
+          <DockIcon id="power" />
         </DockSystemControl>
       </div>
     </nav>

@@ -32,6 +32,23 @@ export interface DockMagnification {
   influence: number;
   scale: number;
   y: number;
+  width: number;
+}
+
+function restingMagnification(itemWidth: number): DockMagnification {
+  return {
+    influence: 0,
+    scale: 1,
+    y: 0,
+    width: Math.max(itemWidth, 0),
+  };
+}
+
+function readDockRestingWidth(
+  item: HTMLElement | null,
+  face: HTMLElement | null,
+) {
+  return face?.offsetWidth || item?.offsetWidth || 0;
 }
 
 export interface LaunchOrigin {
@@ -58,7 +75,7 @@ export function getDockMagnification(
     || !Number.isFinite(pointerX)
     || itemWidth <= 0
   ) {
-    return { influence: 0, scale: 1, y: 0 };
+    return restingMagnification(itemWidth);
   }
 
   const influenceRadius = itemWidth * DOCK_INFLUENCE_WIDTHS;
@@ -69,13 +86,15 @@ export function getDockMagnification(
   const influence = (1 + Math.cos(Math.PI * normalizedDistance)) / 2;
 
   if (influence <= Number.EPSILON) {
-    return { influence: 0, scale: 1, y: 0 };
+    return restingMagnification(itemWidth);
   }
 
+  const scale = 1 + (DOCK_MAX_SCALE - 1) * influence;
   return {
     influence,
-    scale: 1 + (DOCK_MAX_SCALE - 1) * influence,
+    scale,
     y: -DOCK_MAX_LIFT * influence,
+    width: itemWidth * scale,
   };
 }
 
@@ -92,16 +111,16 @@ function useDockItemMagnification<T extends HTMLElement>(
   reducedMotion: boolean,
 ) {
   const itemRef = useRef<T>(null);
+  const faceRef = useRef<HTMLElement>(null);
   const influence = useTransform(pointerX, (latestPointerX) => {
     const item = itemRef.current;
     if (!item) return 0;
 
     const bounds = item.getBoundingClientRect();
-    const restingWidth = item.offsetWidth || bounds.width;
     return getDockMagnification(
       latestPointerX,
       bounds.left + bounds.width / 2,
-      restingWidth,
+      readDockRestingWidth(item, faceRef.current),
       reducedMotion,
     ).influence;
   });
@@ -116,23 +135,36 @@ function useDockItemMagnification<T extends HTMLElement>(
     [0, 1],
     [0, -DOCK_MAX_LIFT],
   );
-  const style: MotionStyle = reducedMotion
+  const width = useTransform(springInfluence, (latestInfluence) => {
+    const restingWidth = readDockRestingWidth(itemRef.current, faceRef.current);
+    if (restingWidth <= 0) return "auto";
+    return restingWidth * (1 + (DOCK_MAX_SCALE - 1) * latestInfluence);
+  });
+  const visualStyle: MotionStyle = reducedMotion
     ? { scale: 1, y: 0 }
     : { scale, y };
+  const layoutStyle: MotionStyle = reducedMotion ? {} : { width };
 
-  return { itemRef, style };
+  return { itemRef, faceRef, visualStyle, layoutStyle };
 }
 
 function DockItemContent({
   app,
+  faceRef,
   style,
 }: {
   app: PublicApp;
+  faceRef: Ref<HTMLElement>;
   style: MotionStyle;
 }) {
   return (
     <>
-      <motion.span className="dock-item-icon" aria-hidden="true" style={style}>
+      <motion.span
+        className="dock-item-icon"
+        aria-hidden="true"
+        ref={faceRef}
+        style={style}
+      >
         <DockIcon id={app.id} />
       </motion.span>
       <small>{app.label}</small>
@@ -151,10 +183,8 @@ function InternalDockItem({
   reducedMotion: boolean;
   onOpen: (origin: LaunchOrigin) => void;
 }) {
-  const { itemRef, style } = useDockItemMagnification<HTMLButtonElement>(
-    pointerX,
-    reducedMotion,
-  );
+  const { itemRef, faceRef, visualStyle, layoutStyle } =
+    useDockItemMagnification<HTMLButtonElement>(pointerX, reducedMotion);
 
   return (
     <motion.button
@@ -164,9 +194,10 @@ function InternalDockItem({
       type="button"
       onClick={(event) => onOpen(elementLaunchOrigin(event.currentTarget))}
       ref={itemRef}
+      style={layoutStyle}
       aria-label={`Open ${app.label}`}
     >
-      <DockItemContent app={app} style={style} />
+      <DockItemContent app={app} faceRef={faceRef} style={visualStyle} />
     </motion.button>
   );
 }
@@ -180,10 +211,8 @@ function ExternalDockItem({
   pointerX: MotionValue<number>;
   reducedMotion: boolean;
 }) {
-  const { itemRef, style } = useDockItemMagnification<HTMLAnchorElement>(
-    pointerX,
-    reducedMotion,
-  );
+  const { itemRef, faceRef, visualStyle, layoutStyle } =
+    useDockItemMagnification<HTMLAnchorElement>(pointerX, reducedMotion);
 
   return (
     <motion.a
@@ -192,9 +221,10 @@ function ExternalDockItem({
       data-tone={app.tone}
       href={app.href}
       ref={itemRef}
+      style={layoutStyle}
       aria-label={`Open ${app.label}`}
     >
-      <DockItemContent app={app} style={style} />
+      <DockItemContent app={app} faceRef={faceRef} style={visualStyle} />
     </motion.a>
   );
 }
@@ -235,10 +265,8 @@ export const DockSystemControl = forwardRef<
   },
   forwardedRef,
 ) {
-  const { itemRef, style } = useDockItemMagnification<HTMLButtonElement>(
-    pointerX,
-    reducedMotion,
-  );
+  const { itemRef, faceRef, visualStyle, layoutStyle } =
+    useDockItemMagnification<HTMLButtonElement>(pointerX, reducedMotion);
   const setRef = useCallback(
     (node: HTMLButtonElement | null) => {
       itemRef.current = node;
@@ -254,10 +282,17 @@ export const DockSystemControl = forwardRef<
       type="button"
       onClick={onClick}
       ref={setRef}
-      style={style}
+      style={layoutStyle}
       aria-label={ariaLabel}
     >
-      {children}
+      <motion.span
+        className="system-control-face"
+        aria-hidden="true"
+        ref={faceRef}
+        style={visualStyle}
+      >
+        {children}
+      </motion.span>
     </motion.button>
   );
 });

@@ -814,6 +814,7 @@ button.traffic-light-button {
 .dock-item {
   position: relative;
   display: grid;
+  flex: 0 0 auto;
   width: var(--dock-icon-size);
   height: var(--dock-icon-size);
   place-items: center;
@@ -879,6 +880,7 @@ button.traffic-light-button {
 
 .system-control {
   display: grid;
+  flex: 0 0 auto;
   width: var(--dock-icon-size);
   height: var(--dock-icon-size);
   place-items: center;
@@ -887,8 +889,7 @@ button.traffic-light-button {
   border-radius: var(--radius-icon);
   background: transparent;
   color: var(--color-text-muted);
-  transform-origin: bottom center;
-  will-change: transform;
+  transition: transform var(--motion-press) ease-out;
 }
 
 .system-control-face,
@@ -902,6 +903,8 @@ button.traffic-light-button {
   overflow: hidden;
   border-radius: var(--radius-icon);
   box-shadow: 0 8px 16px -8px rgb(var(--color-shadow) / 42%);
+  transform-origin: bottom center;
+  will-change: transform;
 }
 
 .system-control:hover,
@@ -2274,12 +2277,8 @@ a:focus-visible .link-arrow {
   transform: scale(0.95);
 }
 
-.system-control > span {
-  transition: transform var(--motion-press) ease-out;
-}
-
-.system-control:active > span {
-  transform: scale(0.9);
+.system-control:active {
+  transform: scale(0.95);
 }
 
 .switcher-controls button:active {
@@ -2318,7 +2317,7 @@ a:focus-visible .link-arrow {
   .app-window,
   .reel-track,
   .dock-item-icon,
-  .system-control,
+  .system-control-face,
   .now-note,
   .recent-posts a,
   .switcher-controls button {
@@ -2340,7 +2339,7 @@ a:focus-visible .link-arrow {
   }
 
   .dock-item-icon,
-  .system-control {
+  .system-control-face {
     transform: none !important;
     will-change: auto;
   }
