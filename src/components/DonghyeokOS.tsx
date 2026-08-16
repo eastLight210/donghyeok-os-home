@@ -25,6 +25,7 @@ import {
   type WebGLReelHandle,
 } from "@/src/components/WebGLReel";
 import { Dock } from "@/src/components/desktop/Dock";
+import { DockIcon } from "@/src/components/desktop/DockIcons";
 import {
   elementLaunchOrigin,
   type LaunchOrigin,
@@ -65,6 +66,9 @@ function getNearestReelIndex(currentIndex: number, selectedIndex: number) {
 
 function formatTime(date: Date) {
   return new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -173,9 +177,12 @@ function TrafficLights({
           aria-label={closeLabel}
         />
       ) : (
-        <span />
+        <span className="traffic-light-button traffic-light-close" />
       )}
-      <span aria-hidden="true" />
+      <span
+        className="traffic-light-button traffic-light-minimize"
+        aria-hidden="true"
+      />
       {onMaximize ? (
         <button
           type="button"
@@ -185,7 +192,10 @@ function TrafficLights({
           aria-pressed={isMaximized}
         />
       ) : (
-        <span aria-hidden="true" />
+        <span
+          className="traffic-light-button traffic-light-maximize"
+          aria-hidden="true"
+        />
       )}
     </span>
   );
@@ -362,15 +372,13 @@ function MenuBar({ activeLabel }: { activeLabel: string }) {
     <header className="menu-bar">
       <div className="menu-left">
         <span className="menu-mark" aria-hidden="true">
-          ✦
+          d
         </span>
         <strong>DonghyeokOS</strong>
         <span className="menu-divider" aria-hidden="true" />
-        <span>{activeLabel}</span>
+        <span className="menu-app">{activeLabel}</span>
       </div>
       <div className="menu-right" aria-label={`Local time ${time}`}>
-        <span aria-hidden="true">⌁</span>
-        <span className="status-dot" aria-hidden="true" />
         <time>{time}</time>
       </div>
     </header>
@@ -417,13 +425,7 @@ function DesktopHome({
       animate={{ scale: receded ? 0.985 : 1, opacity: receded ? 0.16 : 1 }}
       transition={{ duration: 0.28, ease: "easeInOut" }}
     >
-      <div className="ambient ambient-orange" aria-hidden="true" />
-      <div className="ambient ambient-blue" aria-hidden="true" />
-      <div className="ambient ambient-green" aria-hidden="true" />
-      <div className="desktop-monogram" aria-hidden="true">
-        DH
-      </div>
-      <Window title="about.txt — ~/donghyeok" className="about-window">
+      <Window title="About" className="about-window">
         <p>
           Hi, I&apos;m Donghyeok — a developer who writes to understand and builds
           useful systems.
@@ -433,7 +435,7 @@ function DesktopHome({
           everywhere else.
         </p>
       </Window>
-      <Window title="blog — recent posts" className="blog-window">
+      <Window title="Blog" className="blog-window">
         <ol className="recent-posts">
           {recentPosts.map((post) => (
             <li key={post.href}>
@@ -453,7 +455,7 @@ function DesktopHome({
         }
         aria-label="Open Now"
       >
-        <span>NOW</span>
+        <span>Now</span>
         {homeNowItems.map((item) => (
           <small key={item}>· {item}</small>
         ))}
@@ -604,22 +606,20 @@ function AppWindow({ appId, onClose }: { appId: PublicAppId; onClose: () => void
       data-maximized={isMaximized || undefined}
     >
       <header className="app-window-header">
-        <div>
-          <TrafficLights
-            onClose={onClose}
-            onMaximize={() => setIsMaximized((current) => !current)}
-            isMaximized={isMaximized}
-            closeLabel={`Close ${app.label}`}
-            maximizeLabel={
-              isMaximized
-                ? `Restore ${app.label} window`
-                : `Maximize ${app.label} window`
-            }
-          />
-          <span>{app.label.toLowerCase()} — ~/donghyeok</span>
-        </div>
+        <TrafficLights
+          onClose={onClose}
+          onMaximize={() => setIsMaximized((current) => !current)}
+          isMaximized={isMaximized}
+          closeLabel={`Close ${app.label}`}
+          maximizeLabel={
+            isMaximized
+              ? `Restore ${app.label} window`
+              : `Maximize ${app.label} window`
+          }
+        />
+        <span>{app.label}</span>
         <span className="app-window-shortcut">
-          {coarsePointer ? "TAP × TO CLOSE" : "ESC CLOSE"}
+          {coarsePointer ? "Tap × to close" : "Esc to close"}
         </span>
       </header>
       <div className="app-window-body">
@@ -1166,7 +1166,7 @@ function AppSwitcher({
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.16, ease: "easeOut" }}
             >
-              {selected.glyph}
+              <DockIcon id={selected.id} />
             </motion.span>
           </AnimatePresence>
         </span>
@@ -1245,7 +1245,9 @@ function OpeningApp({
       role="status"
       aria-label={`Opening ${app.label}`}
     >
-      <span>{app.glyph}</span>
+      <span className="opening-app-icon">
+        <DockIcon id={app.id} />
+      </span>
       <strong>{app.label}</strong>
     </motion.div>
   );
@@ -1504,6 +1506,7 @@ export default function DonghyeokOS() {
             (state.name === "desktop" && state.entrance) || undefined
           }
         >
+          <div className="desktop-wallpaper" aria-hidden="true" />
           <MenuBar activeLabel={activeLabel} />
           <div
             className="desktop-surface"

@@ -1,18 +1,27 @@
 :root {
-  --color-bg-canvas: #f8f0e2;
-  --color-bg-canvas-soft: #fffbf3;
+  --font-ui: "IBM Plex Sans", "IBM Plex Sans KR", "Segoe UI", sans-serif;
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-bg-canvas: #8aa0b4;
+  --color-bg-canvas-soft: #f4f1ea;
   --color-bg-desk: #f0e2c9;
   --color-bg-monitor: #17121d;
-  --color-surface-window: rgb(255 255 255 / 76%);
-  --color-surface-window-soft: rgb(255 255 255 / 52%);
+  --color-bg-desktop-fallback: #7f93a8;
+
+  --color-surface-window: rgb(255 255 255 / 74%);
+  --color-surface-window-content: rgb(255 255 255 / 90%);
+  --color-surface-window-soft: rgb(255 255 255 / 42%);
+  --color-surface-glass: rgb(255 255 255 / 28%);
   --color-surface-glass-rim: #fff;
-  --color-surface-sticky: #fce6a4;
-  --color-text-primary: #2b241f;
-  --color-text-secondary: #4e433a;
-  --color-text-muted: #8e7a65;
+  --color-surface-sticky: rgb(255 255 255 / 58%);
+  --color-text-primary: #1d242c;
+  --color-text-secondary: #3d4752;
+  --color-text-muted: #6b7580;
   --color-text-inverse: #fff;
-  --color-border-glass: rgb(255 255 255 / 76%);
-  --color-border-subtle: rgb(43 36 31 / 12%);
+  --color-border-glass: rgb(255 255 255 / 46%);
+  --color-border-subtle: rgb(29 36 44 / 10%);
+  --color-shadow: 20 30 44;
   --color-accent-orange: #d98735;
   --color-accent-orange-soft: #f1b76e;
   --color-accent-ink: #2b241f;
@@ -22,7 +31,10 @@
   --color-reel-lavender: #b7b0c9;
   --color-reel-sage: #abc6ad;
   --color-reel-powder-blue: #a7cad8;
-  --color-window-close: #e7685d;
+  --color-window-close: #ff5f57;
+  --color-window-minimize: #febc2e;
+  --color-window-maximize: #28c840;
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -34,9 +46,11 @@
   --space-12: 48px;
   --space-16: 64px;
   --space-24: 96px;
-  --radius-card: 20px;
-  --radius-window: 28px;
-  --radius-dock: 36px;
+  --radius-card: 14px;
+  --radius-window: 12px;
+  --radius-dock: 22px;
+  --radius-icon: 12px;
+  --radius-widget: 16px;
   --radius-pill: 9999px;
   --stroke-hairline: 1px;
   --motion-press: 120ms;
@@ -47,7 +61,9 @@
   --motion-reel: 580ms;
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-reel: cubic-bezier(0.16, 1, 0.3, 1);
-  --menu-bar-height: 56px;
+  --menu-bar-height: 28px;
+  --window-header-height: 32px;
+  --dock-icon-size: 52px;
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --z-desktop-bg: 0;

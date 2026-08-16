@@ -105,7 +105,7 @@ describe("DonghyeokOS UI contract", () => {
       '[aria-label="Open App Switcher"]',
     );
     expect(launcher).not.toBeNull();
-    expect(launcher?.querySelectorAll("i")).toHaveLength(9);
+    expect(launcher?.querySelector("svg.dock-icon-svg")).not.toBeNull();
 
     await act(async () => launcher?.click());
     await act(async () => vi.advanceTimersByTimeAsync(1));
@@ -292,7 +292,7 @@ describe("DonghyeokOS UI contract", () => {
       document.querySelector(".experience-root")?.getAttribute("data-app-open"),
     ).toBe("true");
     expect(document.querySelector(".app-window-shortcut")?.textContent).toBe(
-      "ESC CLOSE",
+      "Esc to close",
     );
     expect(window.location.search).toBe("?app=contact");
 
