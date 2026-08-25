@@ -508,7 +508,10 @@ function DesktopHome({
         >
           <span>Now</span>
           {homeNowItems.map((item) => (
-            <small key={item}>· {item}</small>
+            <small key={item}>
+              <span aria-hidden="true">· </span>
+              {item}
+            </small>
           ))}
         </button>
         <AnalogClock />

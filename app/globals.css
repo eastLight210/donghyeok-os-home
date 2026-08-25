@@ -828,13 +828,13 @@ button.traffic-light-button {
   min-width: 0;
   min-height: 0;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   gap: 6px;
   padding: var(--space-4) var(--space-5);
   cursor: pointer;
   color: inherit;
-  text-align: center;
+  text-align: left;
   appearance: none;
   transition: box-shadow var(--motion-reduced) ease;
 }
@@ -847,9 +847,17 @@ button.traffic-light-button {
 }
 
 .now-note small {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  width: 100%;
+  min-width: 0;
   color: var(--color-text-on-glass);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.now-note small > span {
+  white-space: pre;
 }
 
 .clock-widget {
@@ -2078,11 +2086,6 @@ button.traffic-light-button {
       "now";
     padding: 0;
     overflow: visible;
-  }
-
-  .now-note {
-    align-items: flex-start;
-    text-align: left;
   }
 
   .experience-root[data-app-open="true"] .desktop-home {
