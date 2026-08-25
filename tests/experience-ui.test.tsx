@@ -2,6 +2,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import DonghyeokOS from "@/src/components/DonghyeokOS";
+import { recentPosts } from "@/src/content/site-content";
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean })
   .IS_REACT_ACT_ENVIRONMENT = true;
@@ -100,6 +101,15 @@ describe("DonghyeokOS UI contract", () => {
     expect(nowNote?.textContent).toContain("writing occasional blog posts");
     expect(nowNote?.textContent).toContain("making small tools for myself");
     expect(nowNote?.textContent).not.toContain("reinforcement learning");
+
+    expect(document.querySelector(".desktop-wallpaper")).not.toBeNull();
+    expect(document.querySelector(".about-widget")?.textContent).toContain(
+      "Hi, I'm Donghyeok",
+    );
+    const blogWidget = document.querySelector(".blog-widget");
+    for (const post of recentPosts) {
+      expect(blogWidget?.textContent).toContain(post.title);
+    }
 
     const launcher = document.querySelector<HTMLButtonElement>(
       '[aria-label="Open App Switcher"]',
@@ -325,7 +335,7 @@ describe("DonghyeokOS UI contract", () => {
     });
     await act(async () => {
       document
-        .querySelector<HTMLButtonElement>('[aria-label="Open Now"]')
+        .querySelector<HTMLButtonElement>('.dock [aria-label="Open Now"]')
         ?.click();
       await vi.advanceTimersByTimeAsync(220);
     });

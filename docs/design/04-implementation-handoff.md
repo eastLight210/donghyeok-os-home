@@ -304,7 +304,7 @@ Exit condition: production smoke test passes on the real domain.
 ### Visual
 
 - Cream/white visual language matches approved tokens.
-- Home retains two main windows, Now note, monogram, menu bar, and resting Dock.
+- Home is a left cluster of glass widgets (About, Blog, Now, analog clock) over the pixel Golden Gate wallpaper, with a thin menu bar and resting Dock.
 - App Switcher is a continuous band, not detached cards.
 - The selected reel face is title-only; the code preview card from the study is not implemented.
 - Projects renders in ink tone in both the Dock and the reel.

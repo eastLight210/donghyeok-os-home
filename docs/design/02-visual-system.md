@@ -23,7 +23,7 @@ Avoid these failure modes:
 
 ## 1.1 System UI chrome study
 
-The Home desktop now uses a system-UI chrome study: an original landscape wallpaper, thinner menu bar and window chrome, IBM Plex Sans for chrome, and illustrated squircle Dock icons. The boot desk stays cream. Do not use Apple fonts, symbols, wallpapers, or logos. Content surfaces may still use DM Serif Display (blog titles, reel faces). Live tokens live in `src/styles/tokens.css` and supersede the cream-canvas Figma values below when the two disagree.
+The Home desktop uses a left cluster of frosted-glass widgets against an original HD-2D / refined pixel-art Golden Gate wallpaper at golden hour. The right two-thirds stay open so the wallpaper is the hero. Widgets and Dock stay photoreal glass — the contrast with the pixel wallpaper is intentional. Menu bar chrome stays thin; IBM Plex Sans is the UI face; Dock icons remain illustrated squircles. The boot desk stays cream; only the entered Home desktop uses the pixel wallpaper. Do not use Apple fonts, symbols, wallpapers, or logos. Content surfaces may still use DM Serif Display (blog titles, reel faces). Live tokens live in `src/styles/tokens.css` and supersede the cream-canvas Figma values below when the two disagree. Desktop wallpaper fallback is a warm dark amber/navy (`--color-bg-desktop-fallback`), not the cool gray-blue of the earlier landscape study.
 
 ## 2. Color tokens
 
