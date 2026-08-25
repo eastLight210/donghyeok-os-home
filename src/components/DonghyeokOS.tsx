@@ -15,7 +15,6 @@ import {
   useState,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
-  type ReactNode,
   type RefObject,
 } from "react";
 import { flushSync } from "react-dom";
@@ -385,23 +384,68 @@ function MenuBar({ activeLabel }: { activeLabel: string }) {
   );
 }
 
-function Window({
-  title,
-  className = "",
-  children,
-}: {
-  title: string;
-  className?: string;
-  children: ReactNode;
-}) {
+function useLocalDate() {
+  const [now, setNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    const update = () => setNow(new Date());
+    update();
+    const timer = window.setInterval(update, 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  return now;
+}
+
+function AnalogClock() {
+  const now = useLocalDate();
+  const timeLabel = now
+    ? new Intl.DateTimeFormat("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).format(now)
+    : "--:--";
+  const hourAngle = now
+    ? (now.getHours() % 12) * 30 + now.getMinutes() * 0.5
+    : null;
+  const minuteAngle = now ? now.getMinutes() * 6 : null;
+
   return (
-    <section className={`os-window ${className}`} aria-label={title}>
-      <header className="window-header">
-        <TrafficLights />
-        <span>{title}</span>
-      </header>
-      <div className="window-content">{children}</div>
-    </section>
+    <div
+      className="desktop-widget clock-widget"
+      role="img"
+      aria-label={`Local time ${timeLabel}`}
+    >
+      <div className="analog-clock" aria-hidden="true">
+        {Array.from({ length: 12 }, (_, index) => (
+          <span
+            className="clock-tick"
+            data-major={index % 3 === 0 || undefined}
+            key={index}
+            style={{ "--tick-angle": `${index * 30}deg` } as CSSProperties}
+          />
+        ))}
+        {[12, 3, 6, 9].map((hour) => (
+          <span className="clock-numeral" data-hour={hour} key={hour}>
+            {hour}
+          </span>
+        ))}
+        {hourAngle !== null && minuteAngle !== null ? (
+          <>
+            <span
+              className="clock-hand clock-hand-hour"
+              style={{ transform: `rotate(${hourAngle}deg)` }}
+            />
+            <span
+              className="clock-hand clock-hand-minute"
+              style={{ transform: `rotate(${minuteAngle}deg)` }}
+            />
+          </>
+        ) : null}
+        <span className="clock-pivot" />
+      </div>
+    </div>
   );
 }
 
@@ -425,41 +469,50 @@ function DesktopHome({
       animate={{ scale: receded ? 0.985 : 1, opacity: receded ? 0.16 : 1 }}
       transition={{ duration: 0.28, ease: "easeInOut" }}
     >
-      <Window title="About" className="about-window">
-        <p>
-          Hi, I&apos;m Donghyeok — a developer who writes to understand and builds
-          useful systems.
-        </p>
-        <p>
-          This site is my desk on the internet: essays on the blog, experiments
-          everywhere else.
-        </p>
-      </Window>
-      <Window title="Blog" className="blog-window">
-        <ol className="recent-posts">
-          {recentPosts.map((post) => (
-            <li key={post.href}>
-              <a href={post.href}>
-                <strong>{post.title}</strong>
-                <time>{post.date}</time>
-              </a>
-            </li>
+      <div className="desktop-widgets">
+        <section className="desktop-widget about-widget" aria-label="About">
+          <span className="about-widget-mark" aria-hidden="true">
+            D
+          </span>
+          <div className="about-widget-copy">
+            <p>
+              Hi, I&apos;m Donghyeok — a developer who writes to understand and
+              builds useful systems.
+            </p>
+            <p>
+              This site is my desk on the internet: essays on the blog,
+              experiments everywhere else.
+            </p>
+          </div>
+        </section>
+        <section className="desktop-widget blog-widget" aria-label="Blog">
+          <h2>Blog</h2>
+          <ol className="recent-posts">
+            {recentPosts.map((post) => (
+              <li key={post.href}>
+                <a href={post.href}>
+                  <strong>{post.title}</strong>
+                  <time>{post.date}</time>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </section>
+        <button
+          type="button"
+          className="desktop-widget now-note"
+          onClick={(event) =>
+            onOpenApp("now", elementLaunchOrigin(event.currentTarget))
+          }
+          aria-label="Open Now"
+        >
+          <span>Now</span>
+          {homeNowItems.map((item) => (
+            <small key={item}>· {item}</small>
           ))}
-        </ol>
-      </Window>
-      <button
-        type="button"
-        className="now-note"
-        onClick={(event) =>
-          onOpenApp("now", elementLaunchOrigin(event.currentTarget))
-        }
-        aria-label="Open Now"
-      >
-        <span>Now</span>
-        {homeNowItems.map((item) => (
-          <small key={item}>· {item}</small>
-        ))}
-      </button>
+        </button>
+        <AnalogClock />
+      </div>
       <Dock
         onOpenApp={onOpenApp}
         onOpenSwitcher={onOpenSwitcher}

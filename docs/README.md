@@ -2,7 +2,7 @@
 
 This directory is the implementation handoff for the personal home site currently referred to as **DonghyeokOS**.
 
-The intended experience is a warm, cream-colored personal desktop on the web. It begins at a physical desk, enters through a monitor, and becomes a macOS-inspired environment for Donghyeok's public writing and work. The operating-system metaphor is an interaction model, not a literal macOS clone.
+The intended experience is a warm personal desktop on the web. It begins at a cream physical desk, enters through a monitor, and becomes a macOS-inspired environment — pixel-art Golden Gate wallpaper, left-side glass widgets, writing and work — for Donghyeok's public site. The operating-system metaphor is an interaction model, not a literal macOS clone.
 
 ## Status
 

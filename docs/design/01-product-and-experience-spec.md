@@ -127,12 +127,18 @@ Purpose: provide the default public overview and resting navigation state.
 
 Required composition:
 
-- Menu bar: 56 px reference height
-- Large, faint orange `DH` monogram in the background
-- About window on the left
-- Recent Blog window on the right
-- Small Now note in the lower-right area
+- Thin menu bar over the desktop
+- HD-2D / refined pixel-art Golden Gate wallpaper as the visual hero, with the right two-thirds of the desktop left open
+- Left widget cluster in the upper-left (about 42% of desktop width at most): frosted-glass About, Clock, Blog, and Now widgets in a two-column / two-row CSS grid with ~12 px gaps, so the Golden Gate wallpaper still breathes on the right
+  - `grid-template-areas`: `"about clock"` / `"blog now"`
+  - About + Blog are the wider reading column; Clock + Now are the compact status column
+  - Keep this two-column left cluster from desktop down through tablet (768 px). Below 768 px, stack to one column so Korean blog titles stay readable
+- About is a static glass widget with the orange serif `D` mark and canonical About copy — not a window, and without traffic lights
+- Blog is a glass widget listing real recent posts (title + date), not a window; it is the taller left cell
+- Now is a glass widget (keep class `now-note`) that opens the Now app; not a yellow sticky
+- Analog clock is decorative: live local time with hour and minute hands only (no second hand); the clock face stays centered while its cell stretches to match About on row 1
 - Compact Liquid Glass Dock centered near the bottom, holding the four public app items plus two system controls after a divider: the launcher (opens the App Switcher) and the power control (returns to the login screen); no Home item and no active-state indicator dots
+- No floating About/Blog windows on Home
 
 Canonical About copy:
 
@@ -214,7 +220,8 @@ The exact Projects content view is not approved yet. Keep the first implementati
 ### Tablet: 768-1179 px
 
 - Preserve the narrative but simplify the physical desk props.
-- Stack or overlap Home windows more tightly.
+- Keep the Home widget cluster as a two-column left grid; do not collapse it to a full-width stack for Dock clearance (the short two-row cluster already clears the centered Dock).
+- Stack or overlap Home app windows more tightly.
 - Reduce the reel width while retaining one center face and two narrow side previews.
 - Do not reduce body text below accessible sizes.
 
