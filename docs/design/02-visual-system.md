@@ -23,7 +23,7 @@ Avoid these failure modes:
 
 ## 1.1 System UI chrome study
 
-The Home desktop uses a left cluster of frosted-glass widgets against an original HD-2D / refined pixel-art Golden Gate wallpaper at golden hour. The right two-thirds stay open so the wallpaper is the hero. Widgets and Dock stay photoreal glass — the contrast with the pixel wallpaper is intentional. Menu bar chrome stays thin; IBM Plex Sans is the UI face; Dock icons remain illustrated squircles. The boot desk stays cream; only the entered Home desktop uses the pixel wallpaper. Do not use Apple fonts, symbols, wallpapers, or logos. Content surfaces may still use DM Serif Display (blog titles, reel faces). Live tokens live in `src/styles/tokens.css` and supersede the cream-canvas Figma values below when the two disagree. Desktop wallpaper fallback is a warm dark amber/navy (`--color-bg-desktop-fallback`), not the cool gray-blue of the earlier landscape study.
+The Home desktop uses a left cluster of warm dark vibrancy-glass widgets against an original HD-2D / refined pixel-art Golden Gate wallpaper at golden hour. The right two-thirds stay open so the wallpaper is the hero. Widgets and Dock use dark warm macOS-like glass — not milky cream cards; the contrast with the pixel wallpaper is intentional. Menu bar chrome stays thin and light cream; IBM Plex Sans is the UI face; Dock icons are illustrated squircles sitting bare in the tray. The boot desk stays cream; only the entered Home desktop uses the pixel wallpaper. Do not use Apple fonts, symbols, wallpapers, or logos. Content surfaces may still use DM Serif Display (blog titles, reel faces). Live tokens live in `src/styles/tokens.css` and supersede the cream-canvas Figma values below when the two disagree. Desktop wallpaper fallback is a warm dark amber/navy (`--color-bg-desktop-fallback`), not the cool gray-blue of the earlier landscape study.
 
 ## 2. Color tokens
 
@@ -40,14 +40,24 @@ These values are read from the approved Figma screens. Use semantic CSS custom p
   --color-surface-window-soft: rgb(255 255 255 / 52%);
   --color-surface-glass-rim: #ffffff;
   --color-surface-sticky: #fce6a4;
+  --color-surface-widget: rgb(30 23 17 / 55%);
+  --color-surface-widget-fallback: rgb(43 33 25 / 94%);
+  --color-surface-dock: rgb(36 28 21 / 42%);
+  --color-surface-dock-fallback: rgb(40 31 24 / 92%);
 
   --color-text-primary: #2b241f;
   --color-text-secondary: #4e433a;
   --color-text-muted: #8e7a65;
   --color-text-inverse: #ffffff;
+  --color-text-on-glass: rgb(255 255 255 / 95%);
+  --color-text-on-glass-secondary: rgb(255 255 255 / 72%);
+  --color-text-on-glass-muted: rgb(255 255 255 / 56%);
 
   --color-border-glass: rgb(255 255 255 / 76%);
+  --color-border-glass-dark: rgb(255 255 255 / 22%);
   --color-border-subtle: rgb(43 36 31 / 12%);
+  --color-separator-on-glass: rgb(255 255 255 / 14%);
+  --color-dock-divider: rgb(255 255 255 / 22%);
 
   --color-accent-orange: #d98735;
   --color-accent-orange-soft: #f1b76e;
@@ -58,7 +68,8 @@ These values are read from the approved Figma screens. Use semantic CSS custom p
 
 Color usage rules:
 
-- Cream is the environment, not just a card background.
+- Cream is the boot desk, menu bar, and window chrome — not the Home widget or Dock material.
+- Home widgets and the resting Dock use warm dark vibrancy glass with white-on-glass type.
 - Orange is the identity accent and focus color.
 - Blue, green, and ink identify apps; they are not generic status colors.
 - Projects is ink everywhere, including its App Switcher reel face; the approved study's blue center face is superseded. Confirm the exact ink primitive in Figma Foundations before implementation.
@@ -109,8 +120,9 @@ Web implementation guidance:
 :root {
   --radius-card: 14px;
   --radius-window: 12px;
-  --radius-dock: 22px;
+  --radius-dock: 26px;
   --radius-icon: 12px;
+  --radius-widget: 24px;
   --radius-pill: 9999px;
   --stroke-hairline: 1px;
 }
@@ -119,8 +131,8 @@ Web implementation guidance:
 Geometry rules:
 
 - Windows use 12 px corners and a 32 px title/header zone.
-- Dock surfaces use 22 px corners. Dock icons are 52 px squircles.
-- Dock Item icons are rounded squares, not circles.
+- Dock surfaces use 26 px corners. Home widgets use 24 px corners. Dock icons are 52 px squircles sitting bare in the tray (no clipped rounded-rect mask).
+- Dock Item icons are squircles, not circles.
 - The App Switcher reel is a perspective band with shallow top and bottom arcs. Do not substitute three rounded rectangles.
 - Circular controls are reserved for directional or system actions.
 
@@ -168,16 +180,32 @@ fill: rgb(255 255 255 / 76%)
 border: 1px solid rgb(255 255 255 / 76%)
 ```
 
-### Dock material
+### Widget material
 
-Figma `Glass/Dock`:
+Home widgets (About, Blog, Now, analog clock) — warm dark vibrancy, not milky cream cards:
 
 ```text
-background blur: 28px
-drop shadow: 0 16px 32px -10px rgb(43 36 31 / 16%)
-inner highlight: inset 0 1px 2px rgb(255 255 255 / 82%)
-fill: rgb(255 255 255 / 52%)
-border: 1px solid rgb(255 255 255 / 76%)
+background blur: 36px saturate(1.8)
+drop shadow: 0 20px 44px -18px rgb(20 12 8 / 46%)
+inner highlight: inset 0 1px 0 rgb(255 255 255 / 24%)
+fill: rgb(30 23 17 / 55%)
+border: 1px solid rgb(255 255 255 / 22%)
+fallback: rgb(43 33 25 / 94%)
+```
+
+Type on widgets uses `--color-text-on-glass` / `--color-text-on-glass-secondary`. The analog clock face is a translucent plate in the same family (`rgb(255 255 255 / 7%)`), not an opaque cream disc.
+
+### Dock material
+
+Resting Dock tray (Figma `Glass/Dock` cream values are superseded):
+
+```text
+background blur: 40px saturate(1.8)
+drop shadow: 0 20px 48px -14px rgb(20 12 8 / 50%)
+inner highlight: inset 0 1px 0 rgb(255 255 255 / 28%)
+fill: rgb(36 28 21 / 42%)
+border: 1px solid rgb(255 255 255 / 24%)
+fallback: rgb(40 31 24 / 92%)
 ```
 
 ### Monitor elevation
