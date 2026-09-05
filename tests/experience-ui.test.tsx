@@ -2,622 +2,142 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import DonghyeokOS from "@/src/components/DonghyeokOS";
-import { recentPosts } from "@/src/content/site-content";
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean })
-  .IS_REACT_ACT_ENVIRONMENT = true;
-
-let coarsePointer = false;
-
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: vi.fn().mockImplementation((query: string) => ({
-    matches:
-      query.includes("prefers-reduced-motion")
-      || (coarsePointer && query.includes("pointer: coarse")),
-    media: query,
-    onchange: null,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
+vi.mock("motion/react", () => ({ useReducedMotion: () => true }));
+vi.mock("@/src/components/WebGLReel", () => ({ WebGLReel: () => <canvas aria-hidden="true" /> }));
+(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+HTMLDialogElement.prototype.showModal = function () { this.open = true; };
+HTMLDialogElement.prototype.close = function () { this.open = false; };
+let root: Root;
+const button = (label: string) => document.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)!;
+const click = async (element: HTMLElement) => { await act(async () => { element.focus(); element.click(); }); };
+const key = async (element: HTMLElement, value: string) => { await act(async () => { element.dispatchEvent(new KeyboardEvent("keydown", { key: value, bubbles: true })); }); };
+beforeEach(() => {
+  window.history.replaceState({}, "", "/");
+  document.body.innerHTML = '<div id="root"></div>';
+  root = createRoot(document.getElementById("root")!);
 });
+afterEach(() => { act(() => root.unmount()); document.body.innerHTML = ""; });
 
-function pointerEvent(
-  type: string,
-  {
-    clientX,
-    clientY = 0,
-    pointerId = 1,
-  }: { clientX: number; clientY?: number; pointerId?: number },
-) {
-  const event = new MouseEvent(type, {
-    bubbles: true,
-    button: 0,
-    clientX,
-    clientY,
-  });
-  Object.defineProperties(event, {
-    pointerId: { value: pointerId },
-    pointerType: { value: "mouse" },
-  });
-  return event;
-}
-
-function wheelEvent({
-  deltaX,
-  deltaY = 0,
-}: {
-  deltaX: number;
-  deltaY?: number;
-}) {
-  return new WheelEvent("wheel", {
-    bubbles: true,
-    cancelable: true,
-    deltaX,
-    deltaY,
-  });
-}
-
-describe("DonghyeokOS UI contract", () => {
-  let root: Root;
-  let warnSpy: ReturnType<typeof vi.spyOn>;
-
-  beforeEach(() => {
-    vi.useFakeTimers();
-    coarsePointer = false;
-    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    window.sessionStorage.clear();
-    window.history.replaceState({}, "", "/");
-    document.body.innerHTML = '<div id="root"></div>';
-    const container = document.querySelector("#root");
-    if (!container) throw new Error("Missing test root");
-    root = createRoot(container);
-  });
-
-  afterEach(() => {
-    act(() => root.unmount());
-    vi.useRealTimers();
-    warnSpy.mockRestore();
-    document.body.innerHTML = "";
-  });
-
-  it("enters from the theatrical account and opens a modal switcher", async () => {
+describe("minimal homepage", () => {
+  it("starts with Projects, rotates and wraps without a login", async () => {
     await act(async () => root.render(<DonghyeokOS />));
-
-    const login = document.querySelector<HTMLButtonElement>(
-      '[aria-label="Enter DonghyeokOS as Donghyeok"]',
-    );
-    expect(login).not.toBeNull();
-    expect(login?.classList.contains("monitor")).toBe(true);
-
-    await act(async () => login?.click());
-    await act(async () => vi.advanceTimersByTimeAsync(220));
-
-    const nowNote = document.querySelector(".now-note");
-    expect(nowNote?.textContent).toContain("returning to KAIST this fall");
-    expect(nowNote?.textContent).toContain("writing occasional blog posts");
-    expect(nowNote?.textContent).toContain("making small tools for myself");
-    expect(nowNote?.textContent).not.toContain("reinforcement learning");
-
-    expect(document.querySelector(".desktop-wallpaper")).not.toBeNull();
-    expect(document.querySelector(".about-widget")?.textContent).toContain(
-      "Hi, I'm Donghyeok",
-    );
-    const blogWidget = document.querySelector(".blog-widget");
-    for (const post of recentPosts) {
-      expect(blogWidget?.textContent).toContain(post.title);
-    }
-
-    const launcher = document.querySelector<HTMLButtonElement>(
-      '[aria-label="Open App Switcher"]',
-    );
-    expect(launcher).not.toBeNull();
-    expect(launcher?.querySelector("svg.dock-icon-svg")).not.toBeNull();
-
-    await act(async () => launcher?.click());
-    await act(async () => vi.advanceTimersByTimeAsync(1));
-
-    const dialog = document.querySelector('[role="dialog"][aria-modal="true"]');
-    expect(dialog).not.toBeNull();
-    expect(document.body.dataset.scrollLocked).toBe("true");
-    expect(document.querySelector(".reel-webgl-canvas")).not.toBeNull();
-    expect(document.querySelector(".switch-word")).toBeNull();
-    expect(document.querySelector(".switcher-helper")?.textContent).toContain(
-      "ESC BACK TO DESKTOP",
-    );
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Projects",
-    );
-    expect(
-      document.querySelector('[role="option"][aria-selected="true"]')
-        ?.getAttribute("aria-label"),
-    ).toBe("Projects");
-    expect(
-      document
-        .querySelector<HTMLElement>('.reel-segment[aria-selected="true"]')
-        ?.style.getPropertyValue("--reel-image"),
-    ).toContain("/images/reel/projects.jpg");
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
-    });
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain("Now");
-    const track = document.querySelector<HTMLDivElement>(".reel-track");
-    const nowVisualIndex = Number(track?.dataset.visualIndex);
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
-    });
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Contact",
-    );
-    const contactVisualIndex = Number(track?.dataset.visualIndex);
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
-    });
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Blog",
-    );
-    const blogVisualIndex = Number(track?.dataset.visualIndex);
-    expect(contactVisualIndex).toBe(nowVisualIndex + 1);
-    expect(blogVisualIndex).toBe(contactVisualIndex + 1);
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      await vi.advanceTimersByTimeAsync(400);
-    });
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
-    expect(document.activeElement).toBe(launcher);
-    expect(document.body.dataset.scrollLocked).toBeUndefined();
+    expect(button("Open Projects")).toBeTruthy();
+    expect(document.querySelector("dialog")?.open).toBe(false);
+    await click(button("Next app"));
+    expect(button("Open Now")).toBeTruthy();
+    await key(button("Open Now"), "ArrowRight");
+    await key(button("Open Contact"), "ArrowRight");
+    expect(button("Open Blog")).toBeTruthy();
+    await click(button("Previous app"));
+    expect(button("Open Contact")).toBeTruthy();
   });
-
-  it("mutes the launcher focus treatment when a pointer-opened switcher closes", async () => {
+  it("opens content, closes with Escape, restores focus and preserves selection", async () => {
     await act(async () => root.render(<DonghyeokOS />));
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>(
-          '[aria-label="Enter DonghyeokOS as Donghyeok"]',
-        )
-        ?.click();
-      await vi.advanceTimersByTimeAsync(220);
-    });
-
-    const launcher = document.querySelector<HTMLButtonElement>(
-      '[aria-label="Open App Switcher"]',
-    );
-    expect(launcher).not.toBeNull();
-
-    // Real pointer clicks carry detail > 0; keyboard activation reports 0.
-    await act(async () => {
-      launcher?.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true, detail: 1 }),
-      );
-      await vi.advanceTimersByTimeAsync(1);
-    });
-    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      await vi.advanceTimersByTimeAsync(400);
-    });
-    expect(document.activeElement).toBe(launcher);
-    expect(launcher?.dataset.silentFocus).toBe("true");
-
-    await act(async () => launcher?.blur());
-    expect(launcher?.dataset.silentFocus).toBeUndefined();
-
-    await act(async () => {
-      launcher?.click();
-      await vi.advanceTimersByTimeAsync(1);
-    });
-    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      await vi.advanceTimersByTimeAsync(400);
-    });
-    expect(document.activeElement).toBe(launcher);
-    expect(launcher?.dataset.silentFocus).toBeUndefined();
-  });
-
-  it("uses touch-first helper copy on coarse pointers", async () => {
-    coarsePointer = true;
-    await act(async () => root.render(<DonghyeokOS />));
-
-    expect(document.querySelector(".login-helper")?.textContent).toBe(
-      "TAP TO ENTER",
-    );
-
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>(
-          '[aria-label="Enter DonghyeokOS as Donghyeok"]',
-        )
-        ?.click();
-      await vi.advanceTimersByTimeAsync(220);
-    });
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>('[aria-label="Open App Switcher"]')
-        ?.click();
-      await vi.advanceTimersByTimeAsync(1);
-    });
-
-    expect(document.querySelector(".switcher-helper")?.textContent).toContain(
-      "SWIPE",
-    );
-    expect(document.querySelector(".switcher-helper")?.textContent).toContain(
-      "TAP TO OPEN",
-    );
-    expect(document.querySelector(".open-control")?.textContent).toBe("OPEN");
-    expect(document.querySelector(".close-control")?.textContent).toBe("CLOSE");
-  });
-
-  it("enters from Enter without requiring monitor focus", async () => {
-    await act(async () => root.render(<DonghyeokOS />));
-
-    expect(document.activeElement).toBe(document.body);
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-      await vi.advanceTimersByTimeAsync(220);
-    });
-
-    expect(
-      document.querySelector('[aria-label="Open App Switcher"]'),
-    ).not.toBeNull();
-  });
-
-  it("closes an app window from its red traffic light", async () => {
-    await act(async () => root.render(<DonghyeokOS />));
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-      await vi.advanceTimersByTimeAsync(220);
-    });
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>('[aria-label="Open Contact"]')
-        ?.click();
-      await vi.advanceTimersByTimeAsync(220);
-    });
-
-    const closeButton = document.querySelector<HTMLButtonElement>(
-      '.traffic-light-close[aria-label="Close Contact"]',
-    );
-    const maximizeButton = document.querySelector<HTMLButtonElement>(
-      '.traffic-light-maximize[aria-label="Maximize Contact window"]',
-    );
-    expect(closeButton).not.toBeNull();
-    expect(maximizeButton).not.toBeNull();
-    expect(document.querySelector('.contact-links a[href="mailto:me@donghyeok.net"]')).not.toBeNull();
-    expect(document.querySelector('.contact-links a[href="https://github.com/eastLight210"]')).not.toBeNull();
-    expect(closeButton?.textContent).toBe("");
-    expect(document.querySelector(".app-window")).not.toBeNull();
-    expect(document.body.dataset.scrollLocked).toBe("true");
-    expect(
-      document.querySelector(".experience-root")?.getAttribute("data-app-open"),
-    ).toBe("true");
-    expect(document.querySelector(".app-window-shortcut")?.textContent).toBe(
-      "Esc to close",
-    );
-    expect(window.location.search).toBe("?app=contact");
-
-    await act(async () => maximizeButton?.click());
-    expect(
-      document.querySelector<HTMLElement>(".app-window")?.dataset.maximized,
-    ).toBe("true");
-    expect(maximizeButton?.getAttribute("aria-pressed")).toBe("true");
-    expect(maximizeButton?.getAttribute("aria-label")).toBe(
-      "Restore Contact window",
-    );
-
-    await act(async () => maximizeButton?.click());
-    expect(
-      document.querySelector<HTMLElement>(".app-window")?.dataset.maximized,
-    ).toBeUndefined();
-    expect(maximizeButton?.getAttribute("aria-pressed")).toBe("false");
-
-    await act(async () => closeButton?.click());
-    expect(window.location.search).toBe("");
-    expect(document.body.dataset.scrollLocked).toBeUndefined();
-  });
-
-  it("closes an app window with Escape", async () => {
-    await act(async () => root.render(<DonghyeokOS />));
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-      await vi.advanceTimersByTimeAsync(220);
-    });
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>('.dock [aria-label="Open Now"]')
-        ?.click();
-      await vi.advanceTimersByTimeAsync(220);
-    });
-
-    expect(document.querySelector("#active-app-title")?.textContent).toBe("Now");
+    await click(button("Next app"));
+    const origin = button("Open Now");
+    await click(origin);
     expect(window.location.search).toBe("?app=now");
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-      await vi.advanceTimersByTimeAsync(450);
-    });
-
-    expect(
-      document.querySelector<HTMLElement>(".app-window")?.style.opacity,
-    ).toBe("0");
+    const dialog = document.querySelector("dialog")!;
+    expect(dialog.open).toBe(true);
+    expect(document.activeElement?.id).toBe("panel-title");
+    await act(async () => { dialog.dispatchEvent(new Event("cancel", { cancelable: true })); });
+    expect(dialog.open).toBe(false);
     expect(window.location.search).toBe("");
+    expect(document.activeElement).toBe(origin);
+    expect(button("Open Now")).toBeTruthy();
   });
-
-  it("opens Blog inside the same window system", async () => {
+  it("supports direct content URLs and Back/Forward state", async () => {
+    window.history.replaceState({}, "", "/?app=projects");
     await act(async () => root.render(<DonghyeokOS />));
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-      await vi.advanceTimersByTimeAsync(220);
-    });
-    const blogLauncher = document.querySelector<HTMLElement>(
-      '[aria-label="Open Blog"]',
-    );
-    expect(blogLauncher?.tagName).toBe("BUTTON");
-
-    await act(async () => {
-      blogLauncher?.click();
-      await vi.advanceTimersByTimeAsync(220);
-    });
-
-    expect(document.querySelector("#active-app-title")?.textContent).toBe("Blog");
-    expect(document.querySelectorAll(".blog-app-posts li")).toHaveLength(3);
-    expect(
-      document.querySelector('.traffic-light-close[aria-label="Close Blog"]'),
-    ).not.toBeNull();
-    expect(
-      document.querySelector(
-        '.traffic-light-maximize[aria-label="Maximize Blog window"]',
-      ),
-    ).not.toBeNull();
+    expect(document.querySelector("dialog")?.open).toBe(true);
+    expect(document.querySelector("dialog")?.textContent).toContain("TrackPinch");
+    await act(async () => { window.history.replaceState({}, "", "/"); window.dispatchEvent(new PopStateEvent("popstate")); });
+    expect(document.querySelector("dialog")?.open).toBe(false);
+    await act(async () => { window.history.replaceState({}, "", "/?app=blog"); window.dispatchEvent(new PopStateEvent("popstate")); });
+    expect(document.querySelector("dialog")?.textContent).toContain("OPEN THE FULL BLOG");
   });
-
-  it("opens the selected reel face with a pointer click", async () => {
+  it("keeps standard modified-link clicks and rejects unknown app URLs", async () => {
+    window.history.replaceState({}, "", "/?app=unknown");
     await act(async () => root.render(<DonghyeokOS />));
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-      await vi.advanceTimersByTimeAsync(220);
-    });
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>('[aria-label="Open App Switcher"]')
-        ?.click();
-      await vi.advanceTimersByTimeAsync(1);
-    });
-
-    const stage = document.querySelector<HTMLDivElement>(".reel-stage");
-    const selectedFace = document.querySelector<HTMLButtonElement>(
-      '.reel-segment[aria-selected="true"]',
-    );
-    expect(stage).not.toBeNull();
-    expect(selectedFace?.textContent).toContain("Projects");
-    if (!stage || !selectedFace) return;
-
-    const setPointerCapture = vi.fn();
-    Object.assign(stage, {
-      hasPointerCapture: vi.fn(() => false),
-      releasePointerCapture: vi.fn(),
-      setPointerCapture,
-    });
-
-    await act(async () => {
-      selectedFace.dispatchEvent(pointerEvent("pointerdown", { clientX: 500 }));
-      selectedFace.dispatchEvent(pointerEvent("pointerup", { clientX: 500 }));
-      selectedFace.click();
-      await vi.advanceTimersByTimeAsync(220);
-    });
-
-    expect(setPointerCapture).not.toHaveBeenCalled();
-    expect(document.querySelector("#active-app-title")?.textContent).toBe(
-      "Projects",
-    );
+    expect(document.querySelector("dialog")?.open).toBe(false);
+    const event = new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true });
+    let preventedByApp = true;
+    const observe = (clickEvent: Event) => { preventedByApp = clickEvent.defaultPrevented; clickEvent.preventDefault(); };
+    document.addEventListener("click", observe, { once: true });
+    await act(async () => { document.querySelector("nav a")!.dispatchEvent(event); });
+    expect(preventedByApp).toBe(false);
+    expect(document.querySelector("dialog")?.open).toBe(false);
   });
-
-  it("tracks pointer movement continuously and rotates on release", async () => {
+  it("does not open content after a horizontal drag, and ignores vertical gestures", async () => {
     await act(async () => root.render(<DonghyeokOS />));
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-      await vi.advanceTimersByTimeAsync(220);
-    });
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>('[aria-label="Open App Switcher"]')
-        ?.click();
-      await vi.advanceTimersByTimeAsync(1);
-    });
-
-    const stage = document.querySelector<HTMLDivElement>(".reel-stage");
-    const track = document.querySelector<HTMLDivElement>(".reel-track");
-    const reflectionTrack = document.querySelector<HTMLDivElement>(
-      ".reel-reflection-track",
-    );
-    expect(stage).not.toBeNull();
-    expect(track).not.toBeNull();
-    expect(reflectionTrack).not.toBeNull();
-    if (!stage || !track || !reflectionTrack) return;
-
-    Object.defineProperty(track, "getBoundingClientRect", {
-      value: () => ({
-        bottom: 300,
-        height: 300,
-        left: 0,
-        right: 9840,
-        top: 0,
-        width: 9840,
-        x: 0,
-        y: 0,
-        toJSON: () => ({}),
-      }),
-    });
-    const setPointerCapture = vi.fn();
-    Object.assign(stage, {
-      hasPointerCapture: vi.fn(() => false),
-      releasePointerCapture: vi.fn(),
-      setPointerCapture,
-    });
-
-    await act(async () => {
-      stage.dispatchEvent(pointerEvent("pointerdown", { clientX: 500 }));
-      stage.dispatchEvent(pointerEvent("pointermove", { clientX: 350 }));
-    });
-    expect(track.style.getPropertyValue("--drag-offset")).toBe("-150px");
-    expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("-150px");
-    expect(stage.dataset.dragging).toBe("true");
-    expect(setPointerCapture).toHaveBeenCalledWith(1);
-
-    await act(async () => {
-      stage.dispatchEvent(pointerEvent("pointerup", { clientX: 350 }));
-    });
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Now",
-    );
-
-    await act(async () => vi.advanceTimersByTimeAsync(40));
-    expect(stage.dataset.dragging).toBeUndefined();
-    expect(track.style.getPropertyValue("--drag-offset")).toBe("0px");
-    expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("0px");
+    const stage = button("Open Projects");
+    const send = async (type: string, x: number, y: number) => {
+      const event = new MouseEvent(type, { bubbles: true, button: 0, clientX: x, clientY: y });
+      Object.defineProperty(event, "pointerId", { value: 1 });
+      await act(async () => { stage.dispatchEvent(event); });
+    };
+    await send("pointerdown", 100, 20); await send("pointermove", 20, 20); await send("pointerup", 20, 20);
+    expect(button("Open Now")).toBeTruthy();
+    await act(async () => { stage.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 })); });
+    expect(document.querySelector("dialog")?.open).toBe(false);
+    await send("pointerdown", 100, 20); await send("pointermove", 95, 100); await send("pointerup", 95, 100);
+    expect(button("Open Now")).toBeTruthy();
   });
-
-  it("rotates from a horizontal trackpad gesture without hijacking vertical wheel input", async () => {
+  it("treats a vertical mouse pull as play, never navigation, and cancels on blur", async () => {
     await act(async () => root.render(<DonghyeokOS />));
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-      await vi.advanceTimersByTimeAsync(220);
-    });
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>('[aria-label="Open App Switcher"]')
-        ?.click();
-      await vi.advanceTimersByTimeAsync(1);
-    });
-
-    const stage = document.querySelector<HTMLDivElement>(".reel-stage");
-    const track = document.querySelector<HTMLDivElement>(".reel-track");
-    const reflectionTrack = document.querySelector<HTMLDivElement>(
-      ".reel-reflection-track",
-    );
-    expect(stage).not.toBeNull();
-    expect(track).not.toBeNull();
-    expect(reflectionTrack).not.toBeNull();
-    if (!stage || !track || !reflectionTrack) return;
-
-    Object.defineProperty(track, "getBoundingClientRect", {
-      value: () => ({
-        bottom: 300,
-        height: 300,
-        left: 0,
-        right: 9840,
-        top: 0,
-        width: 9840,
-        x: 0,
-        y: 0,
-        toJSON: () => ({}),
-      }),
-    });
-
-    const verticalWheel = wheelEvent({ deltaX: 8, deltaY: 80 });
-    await act(async () => stage.dispatchEvent(verticalWheel));
-    expect(verticalWheel.defaultPrevented).toBe(false);
-    expect(track.style.getPropertyValue("--drag-offset")).toBe("0px");
-
-    const horizontalWheel = wheelEvent({ deltaX: 60, deltaY: 4 });
-    await act(async () => stage.dispatchEvent(horizontalWheel));
-    expect(horizontalWheel.defaultPrevented).toBe(true);
-    expect(stage.dataset.dragging).toBe("true");
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Now",
-    );
-
-    await act(async () => vi.advanceTimersByTimeAsync(40));
-    expect(stage.dataset.dragging).toBeUndefined();
-    expect(track.style.getPropertyValue("--drag-offset")).toBe("0px");
-    expect(reflectionTrack.style.getPropertyValue("--drag-offset")).toBe("0px");
-
-    await act(async () => {
-      for (const deltaX of [40, 28, 18, 10, 4, 2]) {
-        await vi.advanceTimersByTimeAsync(40);
-        stage.dispatchEvent(wheelEvent({ deltaX, deltaY: 0 }));
-      }
-    });
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Now",
-    );
-
-    await act(async () => {
-      stage.dispatchEvent(wheelEvent({ deltaX: 12, deltaY: 0 }));
-      stage.dispatchEvent(wheelEvent({ deltaX: 60, deltaY: 4 }));
-    });
-    expect(document.querySelector('[aria-selected="true"]')?.textContent).toContain(
-      "Contact",
-    );
+    const stage = button("Open Projects");
+    const send = async (type: string, y: number) => {
+      const event = new MouseEvent(type, { bubbles: true, button: 0, clientX: 100, clientY: y });
+      Object.defineProperties(event, { pointerId: { value: 2 }, pointerType: { value: "mouse" } });
+      await act(async () => { stage.dispatchEvent(event); });
+    };
+    await send("pointerdown", 20);
+    await send("pointermove", 150);
+    await send("pointerup", 150);
+    await act(async () => { stage.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 })); });
+    expect(button("Open Projects")).toBeTruthy();
+    expect(document.querySelector("dialog")?.open).toBe(false);
+    await send("pointerdown", 20);
+    await send("pointermove", 150);
+    await act(async () => { window.dispatchEvent(new Event("blur")); });
+    await send("pointerup", 150);
+    expect(document.querySelector("dialog")?.open).toBe(false);
+    await send("pointerdown", 20);
+    await send("pointerup", 20);
+    await click(stage);
+    expect(document.querySelector("dialog")?.open).toBe(true);
   });
 
-  it("tilts the reel and offsets its reflection with pointer position", async () => {
+  it("has one explorer tab stop and Enter opens after arrow-button selection", async () => {
     await act(async () => root.render(<DonghyeokOS />));
-
-    await act(async () => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
-      await vi.advanceTimersByTimeAsync(220);
-    });
-    await act(async () => {
-      document
-        .querySelector<HTMLButtonElement>('[aria-label="Open App Switcher"]')
-        ?.click();
-      await vi.advanceTimersByTimeAsync(1);
-    });
-
-    const stage = document.querySelector<HTMLDivElement>(".reel-stage");
-    expect(stage).not.toBeNull();
-    if (!stage) return;
-
-    Object.defineProperty(stage, "getBoundingClientRect", {
-      value: () => ({
-        bottom: 500,
-        height: 400,
-        left: 100,
-        right: 900,
-        top: 100,
-        width: 800,
-        x: 100,
-        y: 100,
-        toJSON: () => ({}),
-      }),
-    });
-
-    await act(async () => {
-      stage.dispatchEvent(pointerEvent("pointermove", {
-        clientX: 820,
-        clientY: 140,
-      }));
-    });
-
-    expect(stage.style.getPropertyValue("--reel-rotate-x")).toBe("2.08deg");
-    expect(stage.style.getPropertyValue("--reel-rotate-y")).toBe("2.56deg");
-    expect(stage.style.getPropertyValue("--reel-reflection-x")).toBe("-9.60px");
-    expect(stage.style.getPropertyValue("--reel-reflection-opacity")).toBe("0.328");
-
-    await act(async () => {
-      stage.dispatchEvent(pointerEvent("pointerout", {
-        clientX: 920,
-        clientY: 140,
-      }));
-    });
-
-    expect(stage.style.getPropertyValue("--reel-rotate-x")).toBe("");
-    expect(stage.style.getPropertyValue("--reel-reflection-x")).toBe("");
+    expect(button("Previous app").tabIndex).toBe(-1);
+    expect(button("Next app").tabIndex).toBe(-1);
+    expect(document.querySelector<HTMLAnchorElement>(".explore-link")?.tabIndex).toBe(-1);
+    await click(button("Next app"));
+    expect(document.activeElement).toBe(button("Open Now"));
+    await key(document.activeElement as HTMLElement, "Enter");
+    expect(window.location.search).toBe("?app=now");
+    expect(document.querySelector("dialog")?.open).toBe(true);
   });
+
+  it("rotates from the page without a click, but leaves fields and open panels alone", async () => {
+    await act(async () => root.render(<DonghyeokOS />));
+    await key(document.body, "ArrowRight");
+    expect(button("Open Now")).toBeTruthy();
+    expect(document.activeElement).toBe(button("Open Now"));
+    const input = document.createElement("input");
+    document.body.append(input);
+    await key(input, "ArrowRight");
+    expect(button("Open Now")).toBeTruthy();
+    input.remove();
+    await key(button("Open Now"), "Enter");
+    await key(document.querySelector("dialog")!, "ArrowRight");
+    expect(window.location.search).toBe("?app=now");
+    await click(button("Close content"));
+    expect(button("Open Now")).toBeTruthy();
+    await key(document.body, "ArrowLeft");
+    expect(button("Open Projects")).toBeTruthy();
+  });
+
 });

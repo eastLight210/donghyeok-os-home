@@ -1,6 +1,8 @@
-# DonghyeokOS Home
+# Donghyeok Home
 
-[DonghyeokOS](https://donghyeok.net) is a personal home site built as a warm, desktop-inspired web experience.
+[Donghyeok](https://donghyeok.net) is a minimal black-and-white personal home with an interactive application reel and readable content panels.
+
+The approved design and interaction contract is in [the minimal-home specification](docs/design/05-minimal-home.md).
 
 ## Development
 

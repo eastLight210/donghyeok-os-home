@@ -12,49 +12,19 @@ import {
   projects,
 } from "@/src/content/site-content";
 
-describe("DonghyeokOS experience machine", () => {
-  it("moves through boot, entering, and desktop as one explicit state", () => {
-    const entering = experienceReducer(initialExperienceState, { type: "ENTER" });
-    expect(entering).toEqual({ name: "entering" });
-    expect(experienceReducer(entering, { type: "ENTERED" })).toEqual({
-      name: "desktop",
-      activeApp: null,
-      entrance: true,
-    });
+describe("minimal home state", () => {
+  it("starts directly on the reel and keeps an unbounded rotation offset", () => {
+    expect(initialExperienceState).toEqual({ name: "home", selection: 1 });
+    let state = initialExperienceState;
+    for (let i = 0; i < 20; i++) state = experienceReducer(state, { type: "ROTATE", direction: -1 });
+    expect(state).toEqual({ name: "home", selection: -19 });
   });
-
-  it("rotates exactly one public app and wraps", () => {
-    const switcher = {
-      name: "switcher" as const,
-      selectedApp: "contact" as const,
-      originApp: null,
-    };
-    expect(experienceReducer(switcher, { type: "ROTATE", direction: 1 })).toMatchObject({
-      selectedApp: "blog",
-    });
-  });
-
-  it("powers off through an explicit powering-off state", () => {
-    const poweringOff = experienceReducer(
-      { name: "desktop", activeApp: null },
-      { type: "POWER_OFF" },
-    );
-    expect(poweringOff).toEqual({ name: "powering-off" });
-    expect(experienceReducer(poweringOff, { type: "POWERED_OFF" })).toEqual({
-      name: "boot",
-    });
-  });
-
-  it("returns to the origin app when the switcher is cancelled", () => {
-    const state = {
-      name: "switcher" as const,
-      selectedApp: "contact" as const,
-      originApp: "projects" as const,
-    };
-    expect(experienceReducer(state, { type: "CANCEL_SWITCHER" })).toEqual({
-      name: "desktop",
-      activeApp: "projects",
-    });
+  it("preserves selection across content and browser navigation", () => {
+    const home = { name: "home" as const, selection: 6 };
+    const open = experienceReducer(home, { type: "OPEN_APP", appId: "blog" });
+    expect(experienceReducer(open, { type: "ROTATE", direction: 1 })).toEqual(open);
+    expect(experienceReducer(open, { type: "CLOSE" })).toEqual(home);
+    expect(experienceReducer(home, { type: "NAVIGATE", appId: "contact" })).toEqual({ name: "content", selection: 6, appId: "contact" });
   });
 });
 
@@ -66,16 +36,10 @@ describe("public app contract", () => {
       "now",
       "contact",
     ]);
-    expect(publicApps.map((app) => app.reelImage)).toEqual([
-      "/images/reel/blog.jpg",
-      "/images/reel/projects.jpg",
-      "/images/reel/now.jpg",
-      "/images/reel/contact.jpg",
-    ]);
+
   });
 
-  it("keeps Projects on the ink tone and contains no private app metadata", () => {
-    expect(publicApps.find((app) => app.id === "projects")?.tone).toBe("ink");
+  it("contains no private app metadata", () => {
     expect(publicApps.find((app) => app.id === "blog")?.kind).toBe("internal");
     expect(JSON.stringify(publicApps).toLowerCase()).not.toContain("finance");
   });

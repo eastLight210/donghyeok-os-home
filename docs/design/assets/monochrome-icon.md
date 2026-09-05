@@ -1,0 +1,7 @@
+# Monochrome favicon
+
+Approved September 6, 2026: black background, bold white sans-serif lowercase d; no orange dot, border, or decoration. Generated with the built-in image generation tool, then mechanically resized with macOS sips.
+
+Master: `monochrome-icon-master.png`. Exports: `public/favicon-16x16.png`, `public/favicon-32x32.png`, `public/apple-touch-icon.png` (180), `public/icon-512.png` (512). Dimensions checked; 32px visually inspected. Root-relative link tags keep previews on their own host; `?v=mono-1` invalidates old favicon caches.
+
+Prompt: Create one production-ready website favicon master, square 1024x1024. Pure solid black (#000000) background extending to all four edges of the square. Exactly one pure white lowercase Latin letter 'd' optically centered. Bold clean Arial/Helvetica-style sans-serif, geometric but readable, smooth round bowl, straight ascender, uniform substantial stroke. Letter occupies approximately 65 percent of image height and 48 percent width. It must read as lowercase d, not b, not uppercase D. Flat two-color typographic mark with crisp antialiased edges, perfectly solid white letter and black background. No serif, no orange dot, no border, no texture, no lighting, no shadows, no bevel, no gradients, no perspective, no mockup, no rounded tile corners, no extra text. This is the actual icon asset, not a presentation of an icon. Designed to remain recognizable at 16px.

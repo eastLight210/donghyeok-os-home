@@ -1,4 +1,6 @@
-# DonghyeokOS design documentation
+# Donghyeok home design documentation
+
+> **Current direction — September 5, 2026:** The user approved the monochrome reel image and its implementation. Read [Minimal Home](design/05-minimal-home.md) first. It supersedes the desktop, Dock, boot, material, type, and state-machine decisions below. The remainder is historical context.
 
 This directory is the implementation handoff for the personal home site currently referred to as **DonghyeokOS**.
 

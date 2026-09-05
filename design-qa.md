@@ -1,45 +1,73 @@
-# App Switcher reel design QA
-
-- Source visual truth: `/private/tmp/donghyeokos-design-qa/source-aikawa-desktop.png`
-- Source mobile truth: `/private/tmp/donghyeokos-design-qa/source-aikawa-mobile.png`
-- Implementation desktop: `/private/tmp/donghyeokos-design-qa/implementation-final-desktop.png`
-- Implementation mobile: `/private/tmp/donghyeokos-design-qa/implementation-final-mobile.png`
-- Full-view comparison: `/private/tmp/donghyeokos-design-qa/comparison-desktop-final.png`
-- Focused reel/control comparison: `/private/tmp/donghyeokos-design-qa/comparison-focused-final.png`
-- Mobile comparison: `/private/tmp/donghyeokos-design-qa/comparison-mobile-final.png`
-- Viewports: desktop `1280 × 720`; mobile `390 × 844`
-- State: App Switcher open with one centered face. Source and implementation use different content and color because DonghyeokOS retains its own typed public-app data and approved tone tokens.
-
-## Full-view comparison evidence
-
-The revised reel preserves the source composition's shallow cylindrical top and bottom arcs, broad centered face, narrow neighboring edges, mirrored floor reflection, and bottom-centered glass controller. DonghyeokOS intentionally retains its cream desktop, `SWITCH` word, menu bar, app colors, and required `OPEN` action.
-
-## Focused comparison evidence
-
-- Typography: DM Serif remains the product display face. The selected title now uses transparent gradient fill, a restrained light stroke, internal highlight, and low-opacity shadow to approach the source's refractive glass lettering without copying its licensed font or WebGL material.
-- Spacing and geometry: the center face occupies about 96% of the reel aperture on desktop, leaving only edge slivers. The outer border supplies the cylinder arc; the earlier interior ellipse lines were removed.
-- Color and material: app tone tokens remain authoritative. Bounded highlight, edge shading, and screen-blend layers add depth without introducing new saturated colors.
-- Reflection: a second non-interactive track mirrors the actual selected tone and title, follows selection and drag offsets, and fades through a vertical mask. It is disabled from interaction and remains decorative.
-- Controls: the controller uses a dark translucent fill, bounded blur/saturation, top and side highlights, inset shadows, and nested glass arrow pills. Essential text and accessible button names retain stable contrast.
-- Copy and content: no source copy, images, or portfolio content are used. DonghyeokOS labels and app data remain unchanged.
-
-## Interaction and accessibility evidence
-
-- Previous/next controls move one app and update the controller tone and title.
-- Pointer drag changed the selected app from `Now` to `Contact` and the mirrored track followed the same drag offset.
-- The listbox keeps one unique `aria-selected` option; reflection is `aria-hidden`.
-- Reduced-motion behavior and vertical touch scrolling remain intact.
-- Browser console errors checked: none observed during the switcher interaction pass.
-
-## Comparison history
-
-1. Pass 1 found two P2 differences: neighboring faces were too wide, and decorative ellipse borders crossed the front face instead of staying on the cylinder edge.
-2. The reel track was widened from an 82% to a 96% center-face aperture, side shading was narrowed, and the interior rim elements were removed.
-3. Pass 2 confirmed that only narrow neighboring edges remain, the outer silhouette provides the correct curvature, and the selected title/reflection/controller stay synchronized through arrow and drag changes.
-
-## Follow-up polish
-
-- P3: the source uses photographic WebGL textures and a distortion filter. DonghyeokOS intentionally uses semantic app tones and a CSS/DOM reel, so its refraction is quieter and more editorial.
-- P3: the controller is wider than the source because DonghyeokOS keeps an explicit `OPEN` action required by its interaction contract.
+# Minimal Home — design QA
 
 final result: passed
+
+## Source and evidence
+
+- Source visual truth: `docs/design/references/minimal-home.png`, the single user-selected generated image.
+- Implementation: `http://localhost:5173/` in the Codex in-app browser.
+- Final desktop capture: `docs/design/qa/minimal-home/desktop-final.png`.
+- Source and final desktop: both 1536 × 1024 pixels; browser CSS viewport 1536 × 1024, devicePixelRatio 1. No density normalization required.
+- State: Home, Projects selected, no panel, ordinary motion preference, white theme.
+- Additional evidence: `mobile.png` (390 × 844), `mobile-projects.png` (390 × 844), `narrow-mobile.png` (320 × 740), `fallback.png` (320 × 740), all under `docs/design/qa/minimal-home/`.
+- Final source and desktop screenshot were opened together in the same comparison tool response. Labels, controls, and small text are readable at this resolution, so a separate region crop was unnecessary.
+
+## Findings and comparison history
+
+1. Initial browser review: [P2] neighboring labels were centered at ninety degrees and disappeared around the silhouette. Moved live text toward the visible arc while keeping the continuous cylinder geometry. The corrected desktop evidence shows Blog and Now fully readable.
+2. Initial browser review: [P2] the footer was below the reference viewport, and the central title was too small. Reduced stage whitespace and footer spacing, increased title texture size. `desktop.png` records the corrected composition before the final shadow adjustment.
+3. Narrow mobile review: [P2] Contact wrapped alone beside the wordmark at 320px. Added a separate full-width navigation row at 360px and below. `narrow-mobile.png` records all four destinations on that row.
+4. Final polish: added a subdued drop shadow to match the reference's grounding. `desktop-final.png` was recaptured after reload and verified at 1536 × 1024 with no horizontal overflow. A transient stale compositor capture after viewport switching was overwritten, not used as evidence.
+5. Final paired comparison: no remaining actionable P0/P1/P2 differences. The same introduction, continuous band, initial selection, arrows, CTA, and footer hierarchy are present. P3: the physically generated rim and material remain flatter than the photographic mock, with small differences in curvature, side-label perspective, and title width. These do not obscure selection or change the layout hierarchy.
+
+## Required fidelity surfaces
+
+- Typography: locally available Arial/grotesk sans, regular weights, two-line heading, black title, gray secondary text. No remote font loading. Reference central title is slightly wider; accepted P3 above.
+- Spacing/layout: aligned header, introduction at approximately 7.4% inset, centered reel and controls, substantial white space, quiet footer within desktop viewport. Mobile retains readable content and page scrolling.
+- Colors/tokens: pure white background, near-black text, neutral gray copy, four grayscale reel surfaces. Values reside in `src/styles/tokens.css`. No cream, pastel, photos, glass, or reflections in the live home.
+- Asset fidelity: the reel is an interactive reuse of the project's existing Three.js cylinder geometry, with live text labels. It is not a rasterized mockup. The source contains no other photographic assets to generate. Context-loss fallback intentionally simplifies to a semantic text surface.
+- Copy/content: introduction and primary Project description/CTA match the selected concept. Other descriptions and content come from the existing public records. A small keyboard/drag hint is intentionally added for discoverability. Existing Now information is still explicitly marked July 2026, not presented as newly researched biography.
+
+## Interaction checks
+
+- Initial home appears directly with Projects selected.
+- Mouse drag rotates to Now without accidentally opening content; previous control returns to Projects.
+- Next/previous, wrapping, keyboard ArrowRight and Enter verified. Native button also supports Space.
+- Blog, Projects, Now, and Contact panels render their existing content and configured links.
+- Native modal semantics remove background from the accessibility tree. Heading receives initial focus; Tab reaches content links; Escape closes and focus returns to the opener.
+- Back reopens the previous panel; Forward returns to Home. Direct query URLs are covered by the UI suite.
+- Mobile at 390px and 320px checked; long Projects content scrolls inside its panel. Vertical gestures are not captured by the reel; drag cancellation is covered in the UI suite.
+- Reduced motion emulated through CDP: arrow selection and Enter opening work. Emulation was reset afterward.
+- Forced WebGL context loss through CDP: fallback displayed; next selection and Contact opening remained functional. Reload restored normal rendering afterward.
+- Browser console: no app errors. Motion emitted one expected development warning during reduced-motion emulation.
+
+## Automated validation
+
+- `npm test`: 10 passed (state, public content contract, UI behavior).
+- `npx tsc --noEmit`: passed.
+- `npm run lint`: passed.
+- `npm run build`: passed. Existing Three.js chunk-size and Vinext route-classification notices remain advisory.
+- `git diff --check`: passed.
+
+## Follow-up polish / limits
+
+- P3: optional further refinement of cylinder material shading and curved title treatment.
+- Chromium browser verified; actual Safari and Firefox were not run.
+- Social image updated to the verified rendered homepage. Existing favicon identity retained.
+- Local implementation only; no commit, push, or production deployment in this task.
+
+## Follow-up: physical reel material
+
+User feedback supersedes the earlier acceptance of flatter material. Replaced unlit faces with MeshPhysicalMaterial lit by a PMREM studio environment; introduced rounded upper/lower edge geometry, an illuminated inner shell, and curved text geometry instead of tangent planes. Strengthened the soft grounding shadow and allowed 16px extra control clearance.
+
+Verified rendered Projects at 1536 × 1024 in `docs/design/qa/minimal-home/material-desktop.png`, mobile at 390 × 844 in `material-mobile.png`, and drag rotation into Now. The greater opening depth, broad surface highlights, and visible rim resolve the earlier flatness note. Surrounding monochrome typography/content are unchanged. Browser error log is empty. Tests (10), TypeScript, lint, and production build pass. Social image refreshed from the new desktop capture.
+
+final result: passed
+
+## Follow-up: title/panel synchronization
+
+Removed camera-relative title angle clamping, angle-dependent scale, and explicit visibility thresholds. Curved title geometry is built once and attached to the same rotating group as the panels. Browser inspection of a held partial drag (`docs/design/qa/minimal-home/attached-labels-drag.png`), completion into Now, and reverse rotation confirmed that labels stay on their own panels. Neighboring titles now naturally disappear around the silhouette. Browser console had no errors. Unit tests (10), TypeScript and lint passed.
+
+## Follow-up: pointer play
+
+Added bounded mouse hover pitch/roll and stronger vertical pulling, with damped return. The entire physical assembly tilts as one unit. Corrected the projected-height calculation after a held downward pull exposed clipping; `docs/design/qa/minimal-home/pull-down.png` records the corrected complete silhouette. The assembly scales down within its existing slot only when required by tilt. Browser verified held pull, release without opening content, return to rest, horizontal drag into Now, and reduced-motion stillness. No browser errors. Tests now 11 passing, including vertical mouse pull, cancellation on blur and subsequent normal click. TypeScript, lint and build passed. Mobile vertical intent remains covered by the existing gesture test.

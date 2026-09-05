@@ -21,7 +21,7 @@ export const projects = [
     title: "DonghyeokOS",
     status: "BUILDING",
     summary:
-      "A warm personal desktop for donghyeok.net, built around writing and useful systems.",
+      "A minimal personal home for writing, projects, and experiments, with an interactive application reel.",
     technologies: ["React", "TypeScript", "Motion", "Cloudflare"],
   },
   {
