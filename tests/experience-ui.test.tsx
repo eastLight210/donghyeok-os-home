@@ -4,7 +4,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import DonghyeokOS from "@/src/components/DonghyeokOS";
 
 vi.mock("motion/react", () => ({ useReducedMotion: () => true }));
-vi.mock("@/src/components/WebGLReel", () => ({ WebGLReel: () => <canvas aria-hidden="true" /> }));
+const rendererCallbacks = vi.hoisted(() => ({ ready: () => {}, unavailable: () => {} }));
+vi.mock("@/src/components/WebGLReel", () => ({ WebGLReel: (props: { onReady: () => void; onUnavailable: () => void }) => {
+  rendererCallbacks.ready = props.onReady;
+  rendererCallbacks.unavailable = props.onUnavailable;
+  return <canvas aria-hidden="true" />;
+} }));
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 HTMLDialogElement.prototype.showModal = function () { this.open = true; };
 HTMLDialogElement.prototype.close = function () { this.open = false; };
@@ -138,6 +143,19 @@ describe("minimal homepage", () => {
     expect(button("Open Now")).toBeTruthy();
     await key(document.body, "ArrowLeft");
     expect(button("Open Projects")).toBeTruthy();
+  });
+
+  it("never shows the flat fallback during loading, but keeps it on WebGL failure", async () => {
+    await act(async () => root.render(<DonghyeokOS />));
+    expect(button("Open Projects").dataset.renderer).toBe("pending");
+    expect(document.querySelector(".reel-fallback")).toBeNull();
+    await act(async () => rendererCallbacks.ready());
+    expect(button("Open Projects").dataset.renderer).toBe("ready");
+    expect(document.querySelector(".reel-fallback")).toBeNull();
+    await act(async () => rendererCallbacks.unavailable());
+    expect(document.querySelector(".reel-fallback")).not.toBeNull();
+    await click(button("Next app"));
+    expect(button("Open Now")).toBeTruthy();
   });
 
 });

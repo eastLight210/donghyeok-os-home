@@ -164,7 +164,7 @@ export default function DonghyeokOS() {
             onPointerLeave={event => { if (pointer.current && !pointer.current.dragging) finishDrag(event, true); if (!pointer.current) reelRef.current?.resetTilt(); }}
             onBlur={() => reelRef.current?.resetTilt()}>
             <WebGLReel apps={publicApps} visualIndex={state.selection} ref={reelRef} reducedMotion={Boolean(reducedMotion)} onReady={ready} onUnavailable={unavailable} />
-            {reelStatus !== "ready" && <span className="reel-fallback" aria-hidden="true"><span>{selectedApp(state.selection - 1).label}</span><strong>{app.label}</strong><span>{selectedApp(state.selection + 1).label}</span></span>}
+            {reelStatus === "unavailable" && <span className="reel-fallback" aria-hidden="true"><span>{selectedApp(state.selection - 1).label}</span><strong>{app.label}</strong><span>{selectedApp(state.selection + 1).label}</span></span>}
           </button>
           <div className="reel-controls">
             <p className="reel-position" aria-live="polite" aria-atomic="true"><span className="sr-only">{app.label}, </span>{String(publicApps.indexOf(app) + 1).padStart(2, "0")} / 04</p>
