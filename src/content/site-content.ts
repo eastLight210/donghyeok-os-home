@@ -1,21 +1,3 @@
-export const recentPosts = [
-  {
-    title: "폭우와 함께한 한화 야구 첫 직관",
-    date: "JUL 18",
-    href: "https://blog.donghyeok.net/posts/hanhwa-eagles/",
-  },
-  {
-    title: "티모 꿈돌이부터 T1 vs BLG까지",
-    date: "JUL 09",
-    href: "https://blog.donghyeok.net/posts/2026-msi-t1-vs-blg/",
-  },
-  {
-    title: "드디어 획득한 운전면허",
-    date: "JUN 08",
-    href: "https://blog.donghyeok.net/posts/driving-license/",
-  },
-] as const;
-
 export const projects = [
   {
     title: "DonghyeokOS",

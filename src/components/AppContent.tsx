@@ -1,6 +1,7 @@
+import BlogPosts from "./BlogPosts";
 import type { CSSProperties } from "react";
 import { getPublicApp, type PublicAppId } from "@/src/content/public-apps";
-import { recentPosts, projects, nowItems, contactProfile, contactLinks } from "@/src/content/site-content";
+import { projects, nowItems, contactProfile, contactLinks } from "@/src/content/site-content";
 
 export default function AppContent({ appId }: { appId: PublicAppId }) {
   if (appId === "blog") {
@@ -11,19 +12,7 @@ export default function AppContent({ appId }: { appId: PublicAppId }) {
         <p className="app-intro">
           Essays, field notes, and ordinary days collected on my public blog.
         </p>
-        <ol className="blog-app-posts">
-          {recentPosts.map((post, index) => (
-            <li
-              key={post.href}
-              style={{ "--stagger": index } as CSSProperties}
-            >
-              <a href={post.href} target="_blank" rel="noreferrer">
-                <strong>{post.title}</strong>
-                <time>{post.date}</time>
-              </a>
-            </li>
-          ))}
-        </ol>
+        <BlogPosts />
         {blogUrl ? (
           <a
             className="blog-site-link"
