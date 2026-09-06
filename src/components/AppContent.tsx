@@ -78,7 +78,7 @@ export default function AppContent({ appId }: { appId: PublicAppId }) {
             </div>
           ))}
         </dl>
-        <p className="updated-label">UPDATED JUL 2026</p>
+        <p className="updated-label">UPDATED SEP 2026</p>
       </div>
     );
   }

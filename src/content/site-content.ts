@@ -43,9 +43,9 @@ export const nowItems = [
       "Software developer on the NIKKE Engine Team at SHIFT UP · Jan 31, 2024 — May 8, 2026",
   },
   {
-    label: "NEXT",
-    value: "Returning to KAIST for the fall semester on Aug 31, 2026",
-    home: "returning to KAIST this fall",
+    label: "CURRENTLY",
+    value: "Back at KAIST, attending classes for the fall 2026 semester",
+    home: "back at KAIST for the fall semester",
   },
   {
     label: "WRITING",

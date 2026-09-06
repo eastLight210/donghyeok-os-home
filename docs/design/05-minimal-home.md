@@ -14,7 +14,7 @@ The reference is a visual target, never the rendered interface. UI text, links, 
 - Navigation links open content directly; modified clicks retain native link behavior.
 - `/?app=blog|projects|now|contact` opens a readable native dialog with a plain Close button. Existing public content and links are preserved. Blog opens a list of posts and a link to the full public blog.
 - Closing removes only the app query parameter. Back/Forward synchronize the panel. Unknown app values show Home.
-- Existing Now copy remains an explicitly dated July 2026 snapshot; this redesign does not invent newer biographical updates.
+- Now is a manually maintained snapshot. Updated September 6, 2026 from the user's confirmation that they are attending KAIST for the fall semester; do not invent further biographical updates.
 - Public/private exclusion rules from the original spec remain binding.
 
 ## Interaction and accessibility

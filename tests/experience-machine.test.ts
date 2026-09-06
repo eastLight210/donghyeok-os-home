@@ -55,9 +55,9 @@ describe("public app contract", () => {
     });
     expect(JSON.stringify(nowItems)).toContain("SHIFT UP");
     expect(JSON.stringify(nowItems)).toContain("NIKKE Engine Team");
-    expect(JSON.stringify(nowItems)).toContain("Aug 31, 2026");
+    expect(JSON.stringify(nowItems)).toContain("attending classes for the fall 2026 semester");
     expect(homeNowItems).toEqual([
-      "returning to KAIST this fall",
+      "back at KAIST for the fall semester",
       "writing occasional blog posts",
       "making small tools for myself",
     ]);
