@@ -98,6 +98,58 @@ export default function DonghyeokOS() {
     return () => document.removeEventListener("keydown", onArrowKey);
   }, [activeApp]);
 
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || activeApp) return;
+    let distance = 0;
+    let rotated = false;
+    let peak = 0;
+    let previous = 0;
+    let decayed = false;
+    let startedAt = 0;
+    let direction = 0;
+    let idle: ReturnType<typeof setTimeout> | undefined;
+    const reset = () => { clearTimeout(idle); distance = 0; rotated = false; direction = 0; peak = 0; previous = 0; decayed = false; startedAt = 0; };
+    const onWheel = (event: WheelEvent) => {
+      // Only horizontal gestures belong to the reel; leave page scroll and zoom native.
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || pointer.current) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select, [role='textbox'], [role='slider']"))) return;
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+      event.preventDefault();
+      clearTimeout(idle);
+      idle = setTimeout(reset, 140);
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? stage.clientWidth : 1;
+      const delta = event.deltaX * unit;
+      const magnitude = Math.abs(delta);
+      const nextDirection = delta > 0 ? 1 : -1;
+      // Wheel events have no finger-up marker. Keep one step latched throughout
+      // momentum; a fresh impulse after decay (or a reversal) starts a new swipe.
+      const newImpulse = decayed && Date.now() - startedAt >= 120 && magnitude >= Math.max(6, previous + 2, previous * 1.5);
+      if (nextDirection !== direction || newImpulse) {
+        distance = 0;
+        rotated = false;
+        peak = 0;
+        decayed = false;
+        startedAt = Date.now();
+      } else if (magnitude <= peak * .5) {
+        decayed = true;
+      }
+      direction = nextDirection;
+      previous = magnitude;
+      peak = Math.max(peak, magnitude);
+      if (rotated) return;
+      distance += delta;
+      if (Math.abs(distance) < 12) return;
+      rotated = true;
+      distance = 0;
+      dispatch({ type: "ROTATE", direction: nextDirection });
+    };
+    document.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("blur", reset);
+    return () => { reset(); document.removeEventListener("wheel", onWheel); window.removeEventListener("blur", reset); };
+  }, [activeApp]);
+
   const finishDrag = (event: PointerEvent<HTMLButtonElement>, cancelled = false) => {
     const start = pointer.current;
     if (!start || start.id !== event.pointerId) return;
@@ -174,7 +226,7 @@ export default function DonghyeokOS() {
             </div>
             <p className="selected-description">{app.id === "projects" ? "Selected tools and experiments." : app.preview.description}</p>
             <a className="explore-link" tabIndex={-1} href={`/?app=${app.id}`} onClick={event => navigate(event, app.id)}>Explore {app.label.toLowerCase()} <span aria-hidden="true">↗</span></a>
-            <p id="reel-help" className="reel-help">Drag to explore · Arrow keys to choose · Enter to open</p>
+            <p id="reel-help" className="reel-help">Drag or scroll sideways · Arrow keys to choose · Enter to open</p>
           </div>
         </section>
       </main>

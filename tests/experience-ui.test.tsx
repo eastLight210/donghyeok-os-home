@@ -25,6 +25,79 @@ beforeEach(() => {
 afterEach(() => { act(() => root.unmount()); document.body.innerHTML = ""; });
 
 describe("minimal homepage", () => {
+  it("advances once per swipe including long momentum, then accepts a fresh swipe without cursor movement", async () => {
+    vi.useFakeTimers();
+    try {
+      await act(async () => root.render(<DonghyeokOS />));
+      const wheel = async (deltaX: number, options: WheelEventInit = {}) => {
+        const event = new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaX, ...options });
+        await act(async () => { document.body.dispatchEvent(event); });
+        return event.defaultPrevented;
+      };
+      expect(await wheel(10)).toBe(true);
+      expect(button("Open Projects")).toBeTruthy();
+      await wheel(35);
+      expect(button("Open Now")).toBeTruthy();
+      for (const delta of [100, 90, 80, 70, 60, 45, 30, 20, 10, 5, 3]) {
+        await act(async () => vi.advanceTimersByTime(100));
+        await wheel(delta);
+      }
+      expect(button("Open Now")).toBeTruthy();
+      // A new impulse interrupts the decayed tail without requiring an idle gap.
+      await wheel(50);
+      expect(button("Open Contact")).toBeTruthy();
+      for (const delta of [70, 60, 50, 40, 25, 15, 8, 4, 2]) {
+        await act(async () => vi.advanceTimersByTime(60));
+        await wheel(delta);
+      }
+      expect(button("Open Contact")).toBeTruthy();
+      // Reverse immediately, without waiting for idle or moving the cursor.
+      await wheel(-50);
+      expect(button("Open Now")).toBeTruthy();
+      await act(async () => vi.advanceTimersByTime(230));
+      await wheel(-3, { deltaMode: 1 });
+      expect(button("Open Projects")).toBeTruthy();
+      await act(async () => vi.advanceTimersByTime(200));
+      expect(await wheel(5, { deltaY: 100 })).toBe(false);
+      expect(await wheel(100, { ctrlKey: true })).toBe(false);
+      expect(button("Open Projects")).toBeTruthy();
+      await click(button("Open Projects"));
+      expect(await wheel(100)).toBe(false);
+      await click(button("Close content"));
+      expect(button("Open Projects")).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("accepts light swipes and gradual re-acceleration during a momentum tail", async () => {
+    vi.useFakeTimers();
+    try {
+      await act(async () => root.render(<DonghyeokOS />));
+      const send = async (deltas: number[]) => {
+        for (const deltaX of deltas) {
+          await act(async () => {
+            vi.advanceTimersByTime(16);
+            document.body.dispatchEvent(new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaX }));
+          });
+        }
+      };
+      await send([2, 4, 6]);
+      expect(button("Open Now")).toBeTruthy();
+      await send([8, 7, 6, 5, 4, 3, 2, 1]);
+      expect(button("Open Now")).toBeTruthy();
+      await send([2, 3, 4, 6, 8]);
+      expect(button("Open Contact")).toBeTruthy();
+      await send([7, 5, 3, 2, 1]);
+      expect(button("Open Contact")).toBeTruthy();
+      await act(async () => vi.advanceTimersByTime(150));
+      await send([3, 4, 5]);
+      expect(button("Open Blog")).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("starts with Projects, rotates and wraps without a login", async () => {
     await act(async () => root.render(<DonghyeokOS />));
     expect(button("Open Projects")).toBeTruthy();
