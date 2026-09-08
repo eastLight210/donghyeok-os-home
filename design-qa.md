@@ -71,3 +71,17 @@ Removed camera-relative title angle clamping, angle-dependent scale, and explici
 ## Follow-up: pointer play
 
 Added bounded mouse hover pitch/roll and stronger vertical pulling, with damped return. The entire physical assembly tilts as one unit. Corrected the projected-height calculation after a held downward pull exposed clipping; `docs/design/qa/minimal-home/pull-down.png` records the corrected complete silhouette. The assembly scales down within its existing slot only when required by tilt. Browser verified held pull, release without opening content, return to rest, horizontal drag into Now, and reduced-motion stillness. No browser errors. Tests now 11 passing, including vertical mouse pull, cancellation on blur and subsequent normal click. TypeScript, lint and build passed. Mobile vertical intent remains covered by the existing gesture test.
+
+## Follow-up: blog loading verification — September 8
+
+Verified Blog loading behavior on desktop (1536 × 1024) and mobile (390 × 844) viewports:
+
+- Same-origin proxy: `/api/blog-feed` proxies upstream with `cache-control: no-store` without server-side caching.
+- Intent prefetch & request deduplication: prefetching is triggered on Blog reel selection, pointer hover, and keyboard focus. Holding the same-origin response using real RSS payload verified that closing and reopening while a request was pending reused the single in-flight request.
+- Memory caching & freshness: feed data is cached in browser memory across modal close/reopen cycles during the active session (60s freshness). Reopening with cached data renders immediately with no skeleton.
+- Background refresh resilience: quiet background refresh runs when stale or on focus; a simulated failed background refresh preserved both readable posts without rendering an error status.
+- Navigation & focus restoration: direct `/?app=blog` URL, keyboard selection and Enter, navigation focus prefetch, Back/Forward history transitions, and Escape modal close with opener focus restoration all passed.
+- Mobile & accessibility: verified on 390 × 844 with no horizontal modal overflow. Reduced-motion mode displays the static accessible skeleton (`role="status"`, `aria-label="Loading latest posts"`).
+- Layout shift honesty: cold loading does not guarantee zero layout shift because the static skeleton renders 3 estimated rows whereas the live feed currently has 2 posts, and title wrapping varies across viewports.
+- Visual inspection: reviewed temporary local captures (`/tmp/blog-loading-desktop-cold.png`, `/tmp/blog-loading-desktop-ready.png`, `/tmp/blog-loading-mobile-cold.png`, `/tmp/blog-loading-mobile-ready.png`), confirming cold skeleton and populated post states on desktop and mobile without retaining permanent screenshot artifacts.
+- Automated validation: 25 tests, TypeScript, and lint passed. Final production build succeeded with Vite >500kB chunk advisory and Vinext unknown route-classification notice. Local verification only; no deployment.

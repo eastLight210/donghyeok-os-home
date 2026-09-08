@@ -7,6 +7,7 @@ import { useCallback, useEffect, useReducer, useRef, useState, type MouseEvent, 
 import { useReducedMotion } from "motion/react";
 import { experienceReducer, initialExperienceState, selectedApp } from "@/src/app/experience-machine";
 import { getPublicApp, isPublicAppId, publicApps, type PublicAppId } from "@/src/content/public-apps";
+import { prefetchBlogPosts } from "@/src/content/blog-feed";
 import { WebGLReel, type WebGLReelHandle } from "./WebGLReel";
 import AppContent from "./AppContent";
 
@@ -22,6 +23,9 @@ export default function DonghyeokOS() {
   const suppressClick = useRef(false);
   const app = selectedApp(state.selection);
   const activeApp = state.name === "content" ? state.appId : null;
+  useEffect(() => {
+    if (app.id === "blog") prefetchBlogPosts();
+  }, [app.id]);
   const ready = useCallback(() => setReelStatus("ready"), []);
   const unavailable = useCallback(() => setReelStatus("unavailable"), []);
   const close = useCallback(() => {
@@ -170,7 +174,17 @@ export default function DonghyeokOS() {
       <header className="site-header">
         <a className="wordmark" href="/">Donghyeok</a>
         <nav aria-label="Main navigation">
-          {publicApps.map(item => <a key={item.id} href={`/?app=${item.id}`} onClick={event => navigate(event, item.id)}>{item.label}</a>)}
+          {publicApps.map(item => (
+            <a
+              key={item.id}
+              href={`/?app=${item.id}`}
+              onClick={event => navigate(event, item.id)}
+              onPointerEnter={() => { if (item.id === "blog") prefetchBlogPosts(); }}
+              onFocus={() => { if (item.id === "blog") prefetchBlogPosts(); }}
+            >
+              {item.label}
+            </a>
+          ))}
         </nav>
       </header>
       <main id="main">
@@ -186,6 +200,8 @@ export default function DonghyeokOS() {
           }
         }}>
           <button className="reel-stage" ref={stageRef} type="button" data-renderer={reelStatus} aria-label={`Open ${app.label}`} aria-describedby="reel-help"
+            onPointerEnter={() => { if (app.id === "blog") prefetchBlogPosts(); }}
+            onFocus={() => { if (app.id === "blog") prefetchBlogPosts(); }}
             onClick={event => { if (suppressClick.current && event.detail !== 0) { suppressClick.current = false; return; } open(app.id); }}
             onPointerDown={event => {
               if (event.button !== 0 || pointer.current) return;
@@ -225,7 +241,13 @@ export default function DonghyeokOS() {
               <button type="button" tabIndex={-1} aria-label="Next app" onClick={() => { dispatch({ type: "ROTATE", direction: 1 }); stageRef.current?.focus({ preventScroll: true }); }}>→</button>
             </div>
             <p className="selected-description">{app.id === "projects" ? "Selected tools and experiments." : app.preview.description}</p>
-            <a className="explore-link" tabIndex={-1} href={`/?app=${app.id}`} onClick={event => navigate(event, app.id)}>Explore {app.label.toLowerCase()} <span aria-hidden="true">↗</span></a>
+            <a className="explore-link" tabIndex={-1} href={`/?app=${app.id}`}
+              onClick={event => navigate(event, app.id)}
+              onPointerEnter={() => { if (app.id === "blog") prefetchBlogPosts(); }}
+              onFocus={() => { if (app.id === "blog") prefetchBlogPosts(); }}
+            >
+              Explore {app.label.toLowerCase()} <span aria-hidden="true">↗</span>
+            </a>
             <p id="reel-help" className="reel-help">Drag or scroll sideways · Arrow keys to choose · Enter to open</p>
           </div>
         </section>

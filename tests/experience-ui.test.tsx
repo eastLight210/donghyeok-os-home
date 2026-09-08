@@ -2,7 +2,6 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import DonghyeokOS from "@/src/components/DonghyeokOS";
-
 vi.mock("motion/react", () => ({ useReducedMotion: () => true }));
 const rendererCallbacks = vi.hoisted(() => ({ ready: () => {}, unavailable: () => {} }));
 vi.mock("@/src/components/WebGLReel", () => ({ WebGLReel: (props: { onReady: () => void; onUnavailable: () => void }) => {
@@ -22,7 +21,11 @@ beforeEach(() => {
   document.body.innerHTML = '<div id="root"></div>';
   root = createRoot(document.getElementById("root")!);
 });
-afterEach(() => { act(() => root.unmount()); document.body.innerHTML = ""; });
+afterEach(() => {
+  act(() => root.unmount());
+  vi.unstubAllGlobals();
+  document.body.innerHTML = "";
+});
 
 describe("minimal homepage", () => {
   it("advances once per swipe including long momentum, then accepts a fresh swipe without cursor movement", async () => {
@@ -126,14 +129,26 @@ describe("minimal homepage", () => {
     expect(button("Open Now")).toBeTruthy();
   });
   it("supports direct content URLs and Back/Forward state", async () => {
-    window.history.replaceState({}, "", "/?app=projects");
-    await act(async () => root.render(<DonghyeokOS />));
-    expect(document.querySelector("dialog")?.open).toBe(true);
-    expect(document.querySelector("dialog")?.textContent).toContain("TrackPinch");
-    await act(async () => { window.history.replaceState({}, "", "/"); window.dispatchEvent(new PopStateEvent("popstate")); });
-    expect(document.querySelector("dialog")?.open).toBe(false);
-    await act(async () => { window.history.replaceState({}, "", "/?app=blog"); window.dispatchEvent(new PopStateEvent("popstate")); });
-    expect(document.querySelector("dialog")?.textContent).toContain("OPEN THE FULL BLOG");
+    vi.resetModules();
+    // Dynamic import loads a fresh module instance after vi.resetModules() to isolate the blog feed cache.
+    const { default: DonghyeokOS } = await import("@/src/components/DonghyeokOS");
+    const { promise: pendingFeed, resolve: resolveFeed } = Promise.withResolvers<Response>();
+    vi.stubGlobal("fetch", vi.fn().mockReturnValue(pendingFeed));
+    try {
+      window.history.replaceState({}, "", "/?app=projects");
+      await act(async () => root.render(<DonghyeokOS />));
+      expect(document.querySelector("dialog")?.open).toBe(true);
+      expect(document.querySelector("dialog")?.textContent).toContain("TrackPinch");
+      await act(async () => { window.history.replaceState({}, "", "/"); window.dispatchEvent(new PopStateEvent("popstate")); });
+      expect(document.querySelector("dialog")?.open).toBe(false);
+      await act(async () => { window.history.replaceState({}, "", "/?app=blog"); window.dispatchEvent(new PopStateEvent("popstate")); });
+      expect(document.querySelector("dialog")?.textContent).toContain("OPEN THE FULL BLOG");
+    } finally {
+      await act(async () => {
+        resolveFeed(new Response("<rss><channel/></rss>"));
+      });
+      vi.resetModules();
+    }
   });
   it("keeps standard modified-link clicks and rejects unknown app URLs", async () => {
     window.history.replaceState({}, "", "/?app=unknown");
@@ -230,5 +245,29 @@ describe("minimal homepage", () => {
     await click(button("Next app"));
     expect(button("Open Now")).toBeTruthy();
   });
+  it("prefetches blog feed when hovered in navigation or selected on the reel", async () => {
+    vi.resetModules();
+    // Dynamic import loads a fresh module instance after vi.resetModules() to isolate the blog feed cache.
+    const { default: DonghyeokOS } = await import("@/src/components/DonghyeokOS");
+    const { promise: pending, resolve: resolveFetch } = Promise.withResolvers<Response>();
+    const fetcher = vi.fn().mockReturnValue(pending);
+    vi.stubGlobal("fetch", fetcher);
+    await act(async () => root.render(<DonghyeokOS />));
+    expect(fetcher).not.toHaveBeenCalled();
 
+    const blogNavLink = Array.from(document.querySelectorAll("nav a")).find((el) => el.textContent === "Blog")!;
+    await act(async () => {
+      blogNavLink.dispatchEvent(new Event("pointerover", { bubbles: true }));
+    });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+
+    await click(button("Previous app"));
+    expect(button("Open Blog")).toBeTruthy();
+    // Deduplicated because first fetch is still in flight
+    expect(fetcher).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveFetch(new Response("<rss><channel/></rss>"));
+    });
+  });
 });

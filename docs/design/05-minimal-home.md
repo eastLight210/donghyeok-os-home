@@ -54,3 +54,14 @@ Keyboard follow-up: at the user's request, remove the center-title focus underli
 ## Trackpad navigation — September 7
 
 Horizontal two-finger scrolling anywhere on Home selects the next or previous app without requiring reel hover. Small deltas accumulate to a 12px threshold. Each swipe advances only one entry, including a long momentum tail. A fresh impulse after decay to half the peak and at least 120ms of gesture time, or a direction reversal, starts a new swipe without requiring cursor movement. This is a wheel-delta heuristic because browsers do not expose trackpad finger-up phases. After 140ms without horizontal input, the gesture accumulator resets. Editing fields retain their native input behavior. Vertical scrolling and pinch zoom retain browser behavior. Wheel navigation is inactive during pointer dragging or while a content panel is open, and works with the WebGL fallback and reduced motion.
+
+## Blog loading behavior — September 8
+
+The Blog panel presents the latest posts from the live RSS feed (`/api/blog-feed`, which proxies upstream with `Cache-Control: no-store` without server-side caching). Client-side loading follows these rules:
+
+- Intent prefetch: fetching initiates on high-intent user interaction before opening—selecting Blog on the reel, hovering with pointer over the Blog navigation link or reel stage, or focusing either via keyboard.
+- In-memory cache: feed data is cached in browser memory across modal close/reopen cycles during the active session. No persistent storage (`localStorage` or IndexedDB) is used.
+- Freshness window: cache is fresh for 60 seconds. Subsequent opens within this window render instantly from memory without refetching or displaying a skeleton.
+- Quiet background refresh: when stale or reopened after freshness expiration, the feed refreshes in the background while keeping the last known good posts rendered. Failed refreshes preserve readable posts without falling back to an error or blank screen.
+- Shared in-flight requests: concurrent or duplicate prefetch/open attempts coalesce into a single in-flight network request.
+- Static accessible skeleton on cold load: initial cold load without cached posts displays an accessible loading status (`role="status"`, `aria-label="Loading latest posts"`) with a static three-row skeleton preview. Cold loading does not guarantee zero layout shift because the skeleton renders three estimated rows while the live feed currently has two posts, and title wrapping varies by screen width. Reduced motion preserves the static skeleton without pulse animations.
