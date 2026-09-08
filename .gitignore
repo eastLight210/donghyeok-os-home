@@ -18,6 +18,10 @@
 # tests
 /coverage/
 
+# local browser verification artifacts
+/.playwright-cli/
+/output/playwright/
+
 # local configuration
 .env*
 !.env.example
