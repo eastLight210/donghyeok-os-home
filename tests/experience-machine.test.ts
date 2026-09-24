@@ -45,6 +45,10 @@ describe("public app contract", () => {
   });
 
   it("contains the approved public profile content", () => {
+    expect(projects.find((project) => project.title === "Loadline")).toMatchObject({
+      href: "https://loadline.badgerworks.dev",
+      status: "LIVE",
+    });
     expect(projects.find((project) => project.title === "SSD Remover")).toMatchObject({
       href: "https://github.com/eastLight210/SSD_Remover",
       status: "LIVE",

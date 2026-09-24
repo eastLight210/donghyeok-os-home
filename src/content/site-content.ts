@@ -15,6 +15,14 @@ export const projects = [
     href: "https://blog.donghyeok.net",
   },
   {
+    title: "Loadline",
+    status: "LIVE",
+    summary:
+      "A macOS menu bar app that shows which apps are using your CPU and memory, grouping helper processes under each app, and quits them in one click.",
+    technologies: ["Swift", "SwiftUI", "AppKit", "Sparkle"],
+    href: "https://loadline.badgerworks.dev",
+  },
+  {
     title: "SSD Remover",
     status: "LIVE",
     summary:
