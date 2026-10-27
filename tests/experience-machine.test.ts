@@ -67,7 +67,7 @@ describe("public app contract", () => {
     ]);
     expect(contactProfile.location).toBe("DYLANKIM.DEV / SEJONG");
     expect(contactLinks.map((link) => link.href)).toEqual([
-      "mailto:me@donghyeok.net",
+      "mailto:me@dylankim.dev",
       "https://github.com/eastLight210",
       "https://www.linkedin.com/in/%EB%8F%99%ED%98%81-%EA%B9%80-37775a397/",
     ]);

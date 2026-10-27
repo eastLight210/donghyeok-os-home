@@ -82,8 +82,8 @@ export const contactProfile = {
 export const contactLinks = [
   {
     label: "EMAIL",
-    value: "me@donghyeok.net",
-    href: "mailto:me@donghyeok.net",
+    value: "me@dylankim.dev",
+    href: "mailto:me@dylankim.dev",
   },
   {
     label: "GITHUB",
