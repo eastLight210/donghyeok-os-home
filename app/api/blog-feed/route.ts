@@ -1,7 +1,7 @@
 // Keep the upstream fixed: browsers use this same-origin route without RSS CORS requirements.
 export async function GET() {
   try {
-    const response = await fetch("https://blog.donghyeok.net/rss.xml", {
+    const response = await fetch("https://blog.dylankim.dev/rss.xml", {
       cache: "no-store",
       signal: AbortSignal.timeout(10_000),
     });
