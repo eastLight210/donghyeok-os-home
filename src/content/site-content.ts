@@ -93,7 +93,6 @@ export const contactLinks = [
   {
     label: "LINKEDIN",
     value: "Dylan Kim",
-    href:
-      "https://www.linkedin.com/in/%EB%8F%99%ED%98%81-%EA%B9%80-37775a397/",
+    href: "https://www.linkedin.com/in/dylan-kim-o2lo/",
   },
 ] as const;
