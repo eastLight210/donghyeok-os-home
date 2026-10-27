@@ -21,4 +21,4 @@ npm run build
 
 ## Deployment
 
-Cloudflare Workers Builds deploys the `main` branch to the `donghyeok-os-home` Worker. Production is served from [donghyeok.net](https://donghyeok.net).
+Cloudflare Workers Builds deploys the `main` branch to the `donghyeok-os-home` Worker. Production is served from [dylankim.dev](https://dylankim.dev) (with [donghyeok.net](https://donghyeok.net) redirecting).
