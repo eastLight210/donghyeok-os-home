@@ -17,7 +17,7 @@ export const publicApps: readonly PublicApp[] = [
     id: "blog",
     label: "Blog",
     kind: "internal",
-    href: "https://blog.donghyeok.net",
+    href: "https://blog.dylankim.dev",
     preview: {
       eyebrow: "01 / WRITING",
       title: "Blog",

@@ -1,5 +1,9 @@
 export type BlogPost = { title: string; href: string; date: string };
 
+const BLOG_ORIGIN = "https://blog.dylankim.dev";
+// The blog's RSS may still emit links on its previous host, which now redirects to BLOG_ORIGIN.
+const LEGACY_BLOG_ORIGIN = "https://blog.donghyeok.net";
+
 // RSS is parsed in the browser using its XML parser; no HTML from the feed is rendered.
 export function parseBlogFeed(xml: string): BlogPost[] {
   const document = new DOMParser().parseFromString(xml, "application/xml");
@@ -12,9 +16,10 @@ export function parseBlogFeed(xml: string): BlogPost[] {
     const date = new Date(item.querySelector("pubDate")?.textContent ?? "");
     if (!title || !href || !Number.isFinite(date.getTime())) throw new Error("Invalid blog post");
     const url = new URL(href);
-    if (url.origin !== "https://blog.donghyeok.net" || !url.pathname.startsWith("/posts/")) {
+    if (![BLOG_ORIGIN, LEGACY_BLOG_ORIGIN].includes(url.origin) || !url.pathname.startsWith("/posts/")) {
       throw new Error("Invalid blog link");
     }
+    if (url.origin !== BLOG_ORIGIN) url.host = new URL(BLOG_ORIGIN).host;
     return { title, href: url.href, date: date.toISOString() };
   }).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
 }

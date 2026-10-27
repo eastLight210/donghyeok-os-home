@@ -2,35 +2,35 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://donghyeok.net"),
+  metadataBase: new URL("https://dylankim.dev"),
   title: {
-    default: "Donghyeok — Writing and building",
-    template: "%s — Donghyeok",
+    default: "Dylan Kim — Writing and building",
+    template: "%s — Dylan Kim",
   },
   description:
-    "A personal collection of work, notes, and experiments by Donghyeok.",
+    "A personal collection of work, notes, and experiments by Dylan Kim.",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     url: "/",
-    siteName: "Donghyeok",
-    title: "Donghyeok — Writing and building",
+    siteName: "Dylan Kim",
+    title: "Dylan Kim — Writing and building",
     description:
-      "A personal collection of work, notes, and experiments by Donghyeok.",
+      "A personal collection of work, notes, and experiments by Dylan Kim.",
     images: [
       {
         url: "/og.png",
         width: 1536,
         height: 1024,
-        alt: "Donghyeok — Writing and building",
+        alt: "Dylan Kim — Writing and building",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Donghyeok — Writing and building",
+    title: "Dylan Kim — Writing and building",
     description:
-      "A personal collection of work, notes, and experiments by Donghyeok.",
+      "A personal collection of work, notes, and experiments by Dylan Kim.",
     images: ["/og.png"],
   },
 };
