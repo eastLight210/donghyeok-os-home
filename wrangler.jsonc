@@ -8,6 +8,10 @@
   "preview_urls": true,
   "routes": [
     {
+      "pattern": "dylankim.dev",
+      "custom_domain": true
+    },
+    {
       "pattern": "donghyeok.net",
       "custom_domain": true
     }
