@@ -5,7 +5,7 @@ import { parseBlogFeed } from "@/src/content/blog-feed";
 import { GET } from "@/app/api/blog-feed/route";
 
 const feed = (title = "New &amp; current") =>
-  `<rss><channel><item><title>${title}</title><link>https://blog.donghyeok.net/posts/new/</link><pubDate>Sun, 06 Sep 2026 00:00:00 GMT</pubDate></item></channel></rss>`;
+  `<rss><channel><item><title>${title}</title><link>https://blog.dylankim.dev/posts/new/</link><pubDate>Sun, 06 Sep 2026 00:00:00 GMT</pubDate></item></channel></rss>`;
 
 // Dynamic imports load fresh module instances after vi.resetModules() to avoid test backdoors in production code.
 beforeEach(() => {
@@ -21,14 +21,19 @@ describe("live blog feed", () => {
   it("decodes titles and handles an empty feed without old fallback posts", () => {
     expect(parseBlogFeed(feed())[0]).toEqual({
       title: "New & current",
-      href: "https://blog.donghyeok.net/posts/new/",
+      href: "https://blog.dylankim.dev/posts/new/",
       date: "2026-09-06T00:00:00.000Z",
     });
     expect(parseBlogFeed("<rss><channel/></rss>")).toEqual([]);
     expect(() => parseBlogFeed("<html/>")).toThrow();
     expect(() =>
-      parseBlogFeed(feed().replace("https://blog.donghyeok.net/posts/new/", "javascript:alert(1)"))
+      parseBlogFeed(feed().replace("https://blog.dylankim.dev/posts/new/", "javascript:alert(1)"))
     ).toThrow();
+  });
+
+  it("rewrites links on the previous blog host to the current one", () => {
+    const legacy = feed().replace("https://blog.dylankim.dev/posts/new/", "https://blog.donghyeok.net/posts/new/");
+    expect(parseBlogFeed(legacy)[0].href).toBe("https://blog.dylankim.dev/posts/new/");
   });
 
   it("proxies the live feed without caching and reports upstream failures", async () => {
@@ -40,7 +45,7 @@ describe("live blog feed", () => {
     const response = await GET();
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(await response.text()).toBe(feed());
-    expect(fetcher.mock.calls[0][0]).toBe("https://blog.donghyeok.net/rss.xml");
+    expect(fetcher.mock.calls[0][0]).toBe("https://blog.dylankim.dev/rss.xml");
     expect(fetcher.mock.calls[0][1].cache).toBe("no-store");
     expect((await GET()).status).toBe(502);
   });

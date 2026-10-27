@@ -1,6 +1,6 @@
 export const projects = [
   {
-    title: "DonghyeokOS",
+    title: "DylanOS",
     status: "BUILDING",
     summary:
       "A minimal personal home for writing, projects, and experiments, with an interactive application reel.",
@@ -12,7 +12,7 @@ export const projects = [
     summary:
       "A static-first writing space for development notes, learning logs, and ordinary days.",
     technologies: ["Astro", "MDX", "Cloudflare Workers"],
-    href: "https://blog.donghyeok.net",
+    href: "https://blog.dylankim.dev",
   },
   {
     title: "Loadline",
@@ -76,7 +76,7 @@ export const contactProfile = {
     "A KAIST Computer Science undergraduate who enjoys building software and writing.",
   description:
     "You can reach me by email or find my work and background through the links below.",
-  location: "DONGHYEOK.NET / SEJONG",
+  location: "DYLANKIM.DEV / SEJONG",
 } as const;
 
 export const contactLinks = [
@@ -92,7 +92,7 @@ export const contactLinks = [
   },
   {
     label: "LINKEDIN",
-    value: "Donghyeok Kim",
+    value: "Dylan Kim",
     href:
       "https://www.linkedin.com/in/%EB%8F%99%ED%98%81-%EA%B9%80-37775a397/",
   },

@@ -1,6 +1,6 @@
-# Donghyeok Home
+# Dylan Kim Home
 
-[Donghyeok](https://donghyeok.net) is a minimal black-and-white personal home with an interactive application reel and readable content panels.
+[Dylan Kim](https://dylankim.dev) is a minimal black-and-white personal home with an interactive application reel and readable content panels.
 
 The approved design and interaction contract is in [the minimal-home specification](docs/design/05-minimal-home.md).
 

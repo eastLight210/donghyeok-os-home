@@ -172,7 +172,7 @@ export default function DonghyeokOS() {
     >
       <a className="skip-link" href="#main">Skip to content</a>
       <header className="site-header">
-        <a className="wordmark" href="/">Donghyeok</a>
+        <a className="wordmark" href="/">Dylan Kim</a>
         <nav aria-label="Main navigation">
           {publicApps.map(item => (
             <a
@@ -255,7 +255,7 @@ export default function DonghyeokOS() {
       <footer className="site-footer"><p>Independent work. Always in progress.</p><a href="/?app=contact" onClick={event => navigate(event, "contact")}>Contact <span aria-hidden="true">↗</span></a></footer>
       <dialog className="content-panel" ref={dialogRef} aria-labelledby="panel-title" onCancel={event => { event.preventDefault(); close(); }}>
         {activeApp && <>
-          <header className="panel-header"><span>Donghyeok / {getPublicApp(activeApp).label}</span><button type="button" onClick={close} aria-label="Close content">Close</button></header>
+          <header className="panel-header"><span>Dylan Kim / {getPublicApp(activeApp).label}</span><button type="button" onClick={close} aria-label="Close content">Close</button></header>
           <div className="panel-body"><p className="panel-eyebrow">{getPublicApp(activeApp).preview.eyebrow}</p><h1 id="panel-title" tabIndex={-1}>{getPublicApp(activeApp).label}</h1><AppContent appId={activeApp} /></div>
         </>}
       </dialog>
